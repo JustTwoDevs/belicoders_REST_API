@@ -1,7 +1,7 @@
 import express, { json } from "express";
 import morgan from "morgan";
 import cors from "cors";
-import mainRouter from "./mainRouter.js";
+import mainRouterV1 from "./routes/v1/mainRouterV1.js";
 
 const app = express();
 
@@ -11,6 +11,6 @@ app.use(cors());
 app.use(json());
 
 //main routers
-app.use("/api/v1", mainRouter);
+app.use("/api/v1", mainRouterV1);
 
 export default app;

@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-const mainRouter = Router();
+const mainRouterV1 = Router();
 mainRouter.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-export default mainRouter;
+export default mainRouterV1;
