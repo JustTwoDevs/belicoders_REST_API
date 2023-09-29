@@ -16,6 +16,7 @@ describe("GET /novels", () => {
 
   it("should return a 201 status code", async () => {
     const requestBody = {
+      title: "happy problem",
       statement: "hola",
       outputAnswers: "hola1",
       difficulty: 3,
