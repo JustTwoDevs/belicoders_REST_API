@@ -6,7 +6,8 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
-//Middlewares
+// Middlewares
+
 app.use(morgan("dev"));
 app.use(
   cors({
@@ -17,7 +18,7 @@ app.use(
 app.use(json());
 app.use(cookieParser());
 
-//main routers
+// main routers
 app.use("/api/v1", mainRouterV1);
 
 export default app;
