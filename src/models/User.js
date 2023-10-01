@@ -1,5 +1,7 @@
-import { Schema, model } from "mongoose";
-import pkg from "mongoose";
+import pkg, { Schema, model } from "mongoose";
+import bcrypt from "bcryptjs";
+import { createAccessToken } from "../controllers/jwts.js";
+
 const { models } = pkg;
 
 const userSchema = new Schema({
@@ -40,5 +42,19 @@ const userSchema = new Schema({
   },
 });
 
-const User = models.User || model("User", userSchema);
-export default User;
+userSchema.methods.encryptPassword = function () {
+  this.password = bcrypt.hash(this.password, 10);
+};
+
+userSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+userSchema.methods.generateToken = async function () {
+  return await createAccessToken({
+    id: this._id,
+    username: this.username,
+  });
+};
+
+export const User = models.User || model("User", userSchema);
