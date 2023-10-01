@@ -1,27 +1,28 @@
-import User from "../models/User.js";
-import { createAccessToken } from "./jwts.js";
-import bcrypt from "bcryptjs";
+import { User } from "../models/User.js";
 
 export const login = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const userFound = await User.findOne({ username });
+    const { password, username, email } = req.body;
+    const userFound = username
+      ? await User.findOne({ username })
+      : email
+      ? await User.findOne({ email })
+      : null;
+
     if (!userFound)
       return res.status(400).json({
-        message: ["The usrname does not exist"],
+        message: ["The username or email is incorrect"],
       });
 
-    const isMatch = await bcrypt.compare(password, userFound.password);
+    const isMatch = await userFound.comparePassword(password);
+
     if (!isMatch) {
       return res.status(400).json({
         message: ["The password is incorrect"],
       });
     }
 
-    const token = await createAccessToken({
-      id: userFound._id,
-      username: userFound.username,
-    });
+    const token = await userFound.generateToken();
 
     res.cookie("token", token, {
       httpOnly: false,

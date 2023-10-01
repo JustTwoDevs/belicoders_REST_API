@@ -1,10 +1,8 @@
-import User from "../models/User.js";
-import { createAccessToken } from "./jwts.js";
-import bcrypt from "bcryptjs";
+import { User } from "../models/User.js";
 
 export const register = async (req, res) => {
   try {
-    const { password, email, username } = req.body;
+    const { email, username } = req.body;
 
     const userFoundE = await User.findOne({ email });
     const userFoundU = await User.findOne({ username });
@@ -19,16 +17,11 @@ export const register = async (req, res) => {
         message: ["The username is already in use"],
       });
 
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    req.body.password = passwordHash;
-
     const newUser = new User(req.body);
+    await newUser.encryptPassword();
     const userSaved = await newUser.save();
 
-    const token = await createAccessToken({
-      id: userSaved._id,
-    });
+    const token = await userSaved.generateToken();
 
     res.cookie("token", token, {
       httpOnly: false,
@@ -43,5 +36,25 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     res.status(409).json({ message: error.message });
+  }
+};
+
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const patchProfile = async (req, res) => {
+  try {
+    const userPatch = await User.findByIdAndUpdate(req.params.id, req.body);
+    if (!userPatch) return res.status(404).json({ message: "User not found" });
+    res.status(200).json({ message: "User updated" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
