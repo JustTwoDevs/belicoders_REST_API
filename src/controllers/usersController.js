@@ -1,24 +1,25 @@
-import { User } from "../models/User.js";
+import User from "../models/User.js";
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   try {
     const { email, username } = req.body;
 
-    const userFoundE = await User.findOne({ email });
-    const userFoundU = await User.findOne({ username });
+    const userFound = await User.findOne({
+      $or: [{ email }, { username }],
+    });
 
-    if (userFoundE)
-      return res.status(400).json({
+    if (userFound?.email === email)
+      res.status(400).json({
         message: ["The email is already in use"],
       });
 
-    if (userFoundU)
-      return res.status(400).json({
+    if (userFound?.username === username)
+      res.status(400).json({
         message: ["The username is already in use"],
       });
 
     const newUser = new User(req.body);
-    await newUser.encryptPassword();
+    newUser.encryptPassword();
     const userSaved = await newUser.save();
 
     const token = await userSaved.generateToken();
@@ -35,26 +36,26 @@ export const register = async (req, res) => {
       email: userSaved.email,
     });
   } catch (error) {
-    res.status(409).json({ message: error.message });
+    next(error);
   }
 };
 
-export const getProfile = async (req, res) => {
+export const getProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const patchProfile = async (req, res) => {
+export const patchProfile = async (req, res, next) => {
   try {
     const userPatch = await User.findByIdAndUpdate(req.params.id, req.body);
     if (!userPatch) return res.status(404).json({ message: "User not found" });
     res.status(200).json({ message: "User updated" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };

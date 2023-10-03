@@ -1,6 +1,13 @@
 import pkg, { Schema, model } from "mongoose";
 import bcrypt from "bcryptjs";
 import { createAccessToken } from "../controllers/jwts.js";
+import { createTransport } from "nodemailer";
+import { cryptoRandomStringAsync } from "crypto-random-string";
+
+const transporter = createTransport({
+  service: "gmail",
+  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+});
 
 const { models } = pkg;
 
@@ -40,6 +47,7 @@ const userSchema = new Schema({
     type: String,
     required: [true, "Password is required"],
   },
+  recoverCode: { type: String, required: false },
 });
 
 userSchema.methods.encryptPassword = function () {
@@ -57,4 +65,19 @@ userSchema.methods.generateToken = async function () {
   });
 };
 
-export const User = models.User || model("User", userSchema);
+userSchema.methods.sendRecoverCode = async function () {
+  this.recoverCode = await cryptoRandomStringAsync({
+    length: 6,
+    type: "alphanumeric",
+  });
+  const info = await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: this.email,
+    subject: "Account recover",
+    text: "Hi son of a bitch",
+    html: `<h1>There it is!</h1><p>your recover code is ${this.recoverCode}</p>`,
+  });
+  console.log(info);
+};
+
+export default models.User || model("User", userSchema);
