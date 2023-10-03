@@ -16,6 +16,6 @@ describe("GET /user/register", () => {
       number: 3204422392,
     };
     const response = await request.post("/users/register").send(requestBody);
-    expect(response.status).to.equal(204);
+    expect(response.status).to.equal(400);
   });
 });

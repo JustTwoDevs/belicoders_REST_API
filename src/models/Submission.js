@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, models } from "mongoose";
 
 const submissionSchema = new Schema(
   {
@@ -12,4 +12,4 @@ const submissionSchema = new Schema(
   },
 );
 
-export default model("Submission", submissionSchema);
+export default models.Submission || model("Submission", submissionSchema);

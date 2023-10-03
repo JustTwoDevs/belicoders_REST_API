@@ -9,17 +9,17 @@ export const register = async (req, res, next) => {
     });
 
     if (userFound?.email === email)
-      res.status(400).json({
+      return res.status(400).json({
         message: ["The email is already in use"],
       });
 
     if (userFound?.username === username)
-      res.status(400).json({
+      return res.status(400).json({
         message: ["The username is already in use"],
       });
 
     const newUser = new User(req.body);
-    newUser.encryptPassword();
+    await newUser.encryptPassword();
     const userSaved = await newUser.save();
 
     const token = await userSaved.generateToken();

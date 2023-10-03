@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, models } from "mongoose";
 
 const tagSchema = new Schema(
   {
@@ -9,4 +9,4 @@ const tagSchema = new Schema(
   },
 );
 
-export default model("Tag", tagSchema);
+export default models.Tag || model("Tag", tagSchema);

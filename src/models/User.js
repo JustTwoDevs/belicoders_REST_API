@@ -1,4 +1,4 @@
-import pkg, { Schema, model } from "mongoose";
+import { Schema, model, models } from "mongoose";
 import bcrypt from "bcryptjs";
 import { createAccessToken } from "../controllers/jwts.js";
 import { createTransport } from "nodemailer";
@@ -8,8 +8,6 @@ const transporter = createTransport({
   service: "gmail",
   auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
 });
-
-const { models } = pkg;
 
 const userSchema = new Schema({
   name: { type: String, required: [true, "Name is required"] },
@@ -50,22 +48,38 @@ const userSchema = new Schema({
   recoverCode: { type: String, required: false },
 });
 
-userSchema.methods.encryptPassword = function () {
-  this.password = bcrypt.hash(this.password, 10);
+userSchema.methods.encryptPassword = async function() {
+  this.password = await bcrypt.hash(this.password, 10);
 };
 
-userSchema.methods.comparePassword = async function (password) {
+userSchema.methods.encryptRecoverCode = async function() {
+  this.recoverCode = await bcrypt.hash(this.recoverCode, 10);
+};
+
+userSchema.methods.comparePassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateToken = async function () {
+userSchema.methods.compareRecoverCode = async function(recoverCode) {
+  return await bcrypt.compare(recoverCode, this.recoverCode);
+};
+
+userSchema.methods.generateToken = async function() {
   return await createAccessToken({
     id: this._id,
     username: this.username,
   });
 };
 
-userSchema.methods.sendRecoverCode = async function () {
+userSchema.methods.generateRecoverToken = async function() {
+  return await createAccessToken({
+    id: this._id,
+    username: this.username,
+    subject: "recover",
+  });
+};
+
+userSchema.methods.sendRecoverCode = async function() {
   this.recoverCode = await cryptoRandomStringAsync({
     length: 6,
     type: "alphanumeric",
@@ -77,7 +91,6 @@ userSchema.methods.sendRecoverCode = async function () {
     text: "Hi son of a bitch",
     html: `<h1>There it is!</h1><p>your recover code is ${this.recoverCode}</p>`,
   });
-  console.log(info);
 };
 
 export default models.User || model("User", userSchema);

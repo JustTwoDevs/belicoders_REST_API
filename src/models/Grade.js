@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, models } from "mongoose";
 
 const gradeSchema = new Schema(
   {
@@ -15,4 +15,4 @@ const gradeSchema = new Schema(
   },
 );
 
-export default model("Grade", gradeSchema);
+export default models.Grade || model("Grade", gradeSchema);

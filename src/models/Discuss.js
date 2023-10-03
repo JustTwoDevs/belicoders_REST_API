@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, models } from "mongoose";
 
 const discussSchema = new Schema(
   {
@@ -12,4 +12,4 @@ const discussSchema = new Schema(
   },
 );
 
-export default model("Discuss", discussSchema);
+export default models.Discuss || model("Discuss", discussSchema);

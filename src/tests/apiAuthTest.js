@@ -31,3 +31,30 @@ describe("POST /auth/recover/generate", () => {
     expect(response.status).to.equal(204);
   });
 });
+
+describe("POST /auth/recover/check", () => {
+  it("should return a 400", async () => {
+    const requestBody = {
+      userInfo: "cheto59",
+      recoverCode: "1",
+    };
+    const response = await request
+      .post("/auth/recover/check")
+      .send(requestBody);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal("Incorrect code");
+  });
+});
+
+describe("PATCH /auth/recover", () => {
+  it("should return a 400", async () => {
+    const requestBody = {
+      userInfo: "cheto59",
+      newPassword: "123",
+      recoverCode: "1",
+    };
+    const response = await request.patch("/auth/recover").send(requestBody);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal("Incorrect code");
+  });
+});

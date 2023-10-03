@@ -1,6 +1,4 @@
-import pkg, { Schema, model } from "mongoose";
-
-const { models } = pkg;
+import { Schema, model, models } from "mongoose";
 
 export const States = Object.freeze({
   DRAFT: 0,
@@ -29,7 +27,7 @@ const problemSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const Problem = models.Problem || model("Problem", problemSchema);
+export default models.Problem || model("Problem", problemSchema);

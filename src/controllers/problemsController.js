@@ -53,7 +53,7 @@ export const patchProblemDraft = async (req, res, next) => {
     // validate(req.body) can be the draft patched?
     const patchedProblem = Problem.findOneAndUpdate(
       { _id: req.params.id },
-      req.body
+      req.body,
     );
     if (patchedProblem != null) res.sendStatus(204);
     else res.sendStatus(404);
@@ -67,7 +67,7 @@ export const PublishProblem = async (req, res, next) => {
     // validate(req.body) can be the problem published?
     const PublishedProblem = Problem.findOneAndUpdate(
       { _id: req.params.id },
-      req.body
+      req.body,
     );
     if (PublishedProblem != null) res.sendStatus(204);
     else res.sendStatus(404);

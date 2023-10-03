@@ -8,7 +8,7 @@ export const login = async (req, res, next) => {
     });
 
     if (!userFound)
-      res.status(400).json({
+      return res.status(400).json({
         message: ["The username or email is incorrect"],
       });
 
@@ -59,9 +59,17 @@ export const generateRecoverCode = async (req, res, next) => {
     });
     if (foundUser != null) {
       await foundUser.sendRecoverCode();
+      await foundUser.encryptRecoverCode();
+      await foundUser.save();
+      const token = await foundUser.generateToken();
+      res.cookie("token", token, {
+        httpOnly: false,
+        secure: true,
+        sameSite: "none",
+      });
       res.sendStatus(204);
     } else {
-      res.sendStatus(404);
+      res.sendStatus(404).json("User not found");
     }
   } catch (error) {
     next(error);
@@ -75,13 +83,16 @@ export const checkRecoverCode = async (req, res, next) => {
       $or: [{ email: userInfo }, { username: userInfo }],
     });
     if (foundUser != null) {
-      if (foundUser.recoverCode === recoverCode) {
+      if (foundUser.recoverCode == null)
+        return res.sendStatus(400).json({ message: "No code generated" });
+      const isMatch = await foundUser.compareRecoverCode(recoverCode);
+      if (isMatch) {
         res.sendStatus(204);
       } else {
         res.status(400).json({ message: "Incorrect code" });
       }
     } else {
-      res.status(400);
+      res.status(404).json("User not found");
     }
   } catch (error) {
     next(error);
@@ -95,8 +106,12 @@ export const recovePassword = async (req, res, next) => {
       $or: [{ email: userInfo }, { username: userInfo }],
     });
     if (patchedUser != null) {
-      if (patchedUser.recoverCode === recoverCode) {
+      if (patchedUser.recoverCode == null)
+        return res.sendStatus(400).json({ message: "No code generated" });
+      const isMatch = await patchedUser.compareRecoverCode(recoverCode);
+      if (isMatch) {
         patchedUser.password = newPassword;
+        await patchedUser.encryptPassword();
         patchedUser.recoverCode = null;
         await patchedUser.save();
         res.sendStatus(204);
@@ -104,7 +119,7 @@ export const recovePassword = async (req, res, next) => {
         res.status(400).json({ message: "Incorrect code" });
       }
     } else {
-      res.status(404);
+      res.status(404).json("User not found");
     }
   } catch (error) {
     next(error);
