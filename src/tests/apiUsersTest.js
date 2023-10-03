@@ -15,7 +15,7 @@ describe("GET /user/register", () => {
       email: "carloschiti.12@gmail.com",
       number: 3204422392,
     };
-    const response = await request.post("/user/register").send(requestBody);
+    const response = await request.post("/users/register").send(requestBody);
     expect(response.status).to.equal(204);
   });
 });
