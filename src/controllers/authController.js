@@ -88,6 +88,7 @@ export const resetPassword = async (req, res, next) => {
     });
     if (resetedUser != null) {
       await resetedUser.encryptPassword();
+      await resetedUser.save();
       res.cookie("recovery", "", {
         httpOnly: true,
         secure: true,
