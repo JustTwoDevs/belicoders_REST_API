@@ -68,12 +68,12 @@ export const verifyRecoveryCode = async (req, res, next) => {
           sameSite: "none",
         });
         await foundRecoveryCode.deleteOne();
-        res.status(200).json("Recovery code verified successfully");
+        res.status(200).json({message: "Recovery code generated succesfully"});
       } else {
-        res.status(400).json("Recovery code is wrong or has expired");
+        res.status(400).json({message: "Recovery code wrong or has expired"});
       }
     } else {
-      res.status(404).json("Recovery code not generated or has expired");
+      res.status(404).json({ message: "Recovery code not generated or has expired"});
     }
   } catch (error) {
     next(error);
@@ -94,9 +94,9 @@ export const resetPassword = async (req, res, next) => {
         secure: true,
         expires: new Date(0),
       });
-      res.status(200).json("Password reseted successfully");
+      res.status(200).json({message: "Password Changed succesfully"});
     } else {
-      res.status(404).json("User not found");
+      res.status(404).json({messag: "User not found"});
     }
   } catch (error) {
     next(error);
