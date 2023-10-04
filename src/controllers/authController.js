@@ -85,7 +85,7 @@ export const resetPassword = async (req, res, next) => {
     const { newPassword } = req.body;
     const resetedUser = await User.findByIdAndUpdate(req.recovery.userId, {
       password: newPassword,
-    });
+    }, {new: true});
     if (resetedUser != null) {
       await resetedUser.encryptPassword();
       await resetedUser.save();
@@ -94,7 +94,7 @@ export const resetPassword = async (req, res, next) => {
         secure: true,
         expires: new Date(0),
       });
-      res.status(204).json("Password reseted successfully");
+      res.status(200).json("Password reseted successfully");
     } else {
       res.status(404).json("User not found");
     }
