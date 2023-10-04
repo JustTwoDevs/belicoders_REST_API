@@ -2,23 +2,21 @@ import { User } from "../models/User.js";
 
 export const login = async (req, res) => {
   try {
-    const { password, username, email } = req.body;
-    const userFound = username
-      ? await User.findOne({ username })
-      : email
-      ? await User.findOne({ email })
-      : null;
+    const { userInfo, password } = req.body;
+    const userFound = await User.findOne({
+      $or: [{ email: userInfo }, { username: userInfo }],
+    });
 
     if (!userFound)
       return res.status(400).json({
-        message: ["The username or email is incorrect"],
+        message: "The username or email is incorrect",
       });
 
     const isMatch = await userFound.comparePassword(password);
 
     if (!isMatch) {
       return res.status(400).json({
-        message: ["The password is incorrect"],
+        message: "The password is incorrect",
       });
     }
 

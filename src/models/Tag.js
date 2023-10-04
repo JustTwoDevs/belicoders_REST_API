@@ -1,4 +1,6 @@
-import { Schema, model } from "mongoose";
+import pkg, { Schema, model } from "mongoose";
+
+const { models } = pkg;
 
 const tagSchema = new Schema(
   {
@@ -6,7 +8,7 @@ const tagSchema = new Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-export default model("Tag", tagSchema);
+export const Tag = models.Tag || model("Tag", tagSchema);
