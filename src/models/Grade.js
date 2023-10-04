@@ -1,4 +1,6 @@
-import { Schema, model } from "mongoose";
+import pkg from "mongoose";
+
+const { Schema, model, models } = pkg;
 
 const gradeSchema = new Schema(
   {
@@ -15,4 +17,4 @@ const gradeSchema = new Schema(
   },
 );
 
-export default model("Grade", gradeSchema);
+export default models.Grade || model("Grade", gradeSchema);

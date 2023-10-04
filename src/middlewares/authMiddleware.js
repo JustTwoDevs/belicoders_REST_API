@@ -1,18 +1,19 @@
 import jwt from "jsonwebtoken";
-import "dotenv/config.js";
 
-export const verifyToken = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
   try {
     const { token } = req.cookies;
 
     if (!token)
       return res
         .status(401)
-        .json({ message: "No token, authorization denied" });
+        .json({ message: "No authorization token, authorization denied" });
 
     jwt.verify(token, process.env.TOKEN_SECRET, (error, user) => {
       if (error) {
-        return res.status(401).json({ message: "Token is not valid" });
+        return res
+          .status(401)
+          .json({ message: "Authorization token is not valid" });
       }
       req.user = user;
       next();
@@ -21,3 +22,5 @@ export const verifyToken = (req, res, next) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+export default authMiddleware;

@@ -1,5 +1,4 @@
 import pkg, { Schema, model } from "mongoose";
-
 const { models } = pkg;
 
 const tagSchema = new Schema(
@@ -10,5 +9,6 @@ const tagSchema = new Schema(
     timestamps: true,
   }
 );
+
 
 export const Tag = models.Tag || model("Tag", tagSchema);
