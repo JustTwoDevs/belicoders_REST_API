@@ -15,6 +15,8 @@ export const getProblems = async (req, res, next) => {
     }
     if (tags) query["tags.name"] = { $all: tags.split(",") };
 
+    console.log(query);
+
     const foundProblems = await Problem.find(query)
       .skip((parseInt(page) - 1) * problemsPerPage || 0)
       .limit(problemsPerPage)

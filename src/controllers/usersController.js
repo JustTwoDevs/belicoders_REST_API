@@ -10,12 +10,12 @@ export const register = async (req, res, next) => {
 
     if (userFound?.email === email)
       return res.status(400).json({
-        message: ["The email is already in use"],
+        message: "The email is already in use",
       });
 
     if (userFound?.username === username)
       return res.status(400).json({
-        message: ["The username is already in use"],
+        message: "The username is already in use",
       });
 
     const newUser = new User(req.body);

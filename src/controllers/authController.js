@@ -10,14 +10,14 @@ export const login = async (req, res, next) => {
 
     if (!userFound)
       return res.status(400).json({
-        message: ["The username or email is incorrect"],
+        message: "The username or email is incorrect",
       });
 
     const isMatch = await userFound.comparePassword(password);
 
     if (!isMatch) {
       return res.status(400).json({
-        message: ["The password is incorrect"],
+        message: "The password is incorrect",
       });
     }
 

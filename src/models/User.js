@@ -48,7 +48,7 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.methods.encryptPassword = async function() {
+userSchema.methods.encryptPassword = async function () {
   this.password = await bcrypt.hash(this.password, 10);
 };
 
