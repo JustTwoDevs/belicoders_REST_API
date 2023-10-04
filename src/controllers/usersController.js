@@ -1,18 +1,19 @@
-import { User } from "../models/User.js";
+import User from "../models/User.js";
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   try {
     const { email, username } = req.body;
 
-    const userFoundE = await User.findOne({ email });
-    const userFoundU = await User.findOne({ username });
+    const userFound = await User.findOne({
+      $or: [{ email }, { username }],
+    });
 
-    if (userFoundE)
+    if (userFound?.email === email)
       return res.status(400).json({
         message: ["The email is already in use"],
       });
 
-    if (userFoundU)
+    if (userFound?.username === username)
       return res.status(400).json({
         message: ["The username is already in use"],
       });
@@ -35,26 +36,46 @@ export const register = async (req, res) => {
       email: userSaved.email,
     });
   } catch (error) {
-    res.status(409).json({ message: error.message });
+    next(error);
   }
 };
 
-export const getProfile = async (req, res) => {
+export const getProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const patchProfile = async (req, res) => {
+export const patchProfile = async (req, res, next) => {
   try {
-    const userPatch = await User.findByIdAndUpdate(req.params.id, req.body);
+    const userPatch = await User.findByIdAndUpdate(req.params.userId, req.body);
     if (!userPatch) return res.status(404).json({ message: "User not found" });
     res.status(200).json({ message: "User updated" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
+  }
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    const user = await User.findById(req.params.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const isMatch = await user.comparePassword(oldPassword);
+    if (!isMatch) return res.status(400).json({ message: "Invalid password" });
+
+    user.password = newPassword;
+    await user.encryptPassword();
+    await user.save();
+
+    res.status(200).json({ message: "Password changed" });
+  } catch (error) {
+    next(error);
   }
 };

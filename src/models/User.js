@@ -1,8 +1,14 @@
-import pkg, { Schema, model } from "mongoose";
+import pkg from "mongoose";
 import bcrypt from "bcryptjs";
 import { createAccessToken } from "../controllers/jwts.js";
+import { createTransport } from "nodemailer";
 
-const { models } = pkg;
+const { Schema, model, models } = pkg;
+
+const transporter = createTransport({
+  service: "gmail",
+  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+});
 
 const userSchema = new Schema({
   name: { type: String, required: [true, "Name is required"] },
@@ -42,19 +48,29 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.methods.encryptPassword = function () {
-  this.password = bcrypt.hash(this.password, 10);
+userSchema.methods.encryptPassword = async function() {
+  this.password = await bcrypt.hash(this.password, 10);
 };
 
-userSchema.methods.comparePassword = async function (password) {
+userSchema.methods.comparePassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateToken = async function () {
+userSchema.methods.generateToken = async function() {
   return await createAccessToken({
     id: this._id,
     username: this.username,
   });
 };
 
-export const User = models.User || model("User", userSchema);
+userSchema.methods.sendRecoveryCode = async function(recoveryCode) {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: this.email,
+    subject: "Account recover",
+    text: "Hi son of a bitch",
+    html: `<h1>There it is!</h1><p>your recover code is ${recoveryCode}</p>`,
+  });
+};
+
+export default models.User || model("User", userSchema);

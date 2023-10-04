@@ -1,4 +1,6 @@
-import { Schema, model } from "mongoose";
+import pkg from "mongoose";
+
+const { Schema, model, models } = pkg;
 
 const submissionSchema = new Schema(
   {
@@ -12,4 +14,4 @@ const submissionSchema = new Schema(
   },
 );
 
-export default model("Submission", submissionSchema);
+export default models.Submission || model("Submission", submissionSchema);
