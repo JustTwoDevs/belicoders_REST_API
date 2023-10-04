@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
-import "dotenv/config.js";
 
-export const verifyToken = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
   try {
     const { token } = req.cookies;
 
@@ -21,3 +20,5 @@ export const verifyToken = (req, res, next) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+export default authMiddleware;

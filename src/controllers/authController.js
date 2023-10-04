@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import RecoveryCode from "../models/RecoveryCode.js";
 
 export const login = async (req, res, next) => {
   try {
@@ -51,73 +52,47 @@ export const logout = async (_req, res, next) => {
   }
 };
 
-export const generateRecoverCode = async (req, res, next) => {
+export const verifyRecoveryCode = async (req, res, next) => {
   try {
-    const userInfo = req.body.userInfo;
-    const foundUser = await User.findOne({
-      $or: [{ email: userInfo }, { username: userInfo }],
+    const { userId, recoveryCode } = req.body;
+    const foundRecoveryCode = await RecoveryCode.findOne({
+      userId,
     });
-    if (foundUser != null) {
-      await foundUser.sendRecoverCode();
-      await foundUser.encryptRecoverCode();
-      await foundUser.save();
-      const token = await foundUser.generateToken();
-      res.cookie("token", token, {
-        httpOnly: false,
+    if (foundRecoveryCode != null) {
+      const isVerified = await foundRecoveryCode.verifyCode(recoveryCode);
+      if (isVerified) {
+        const recoveryToken = await foundRecoveryCode.generateToken();
+        res.cookie("recovery", recoveryToken, {
+          httpOnly: false,
+          secure: true,
+          sameSite: "none",
+        });
+        await foundRecoveryCode.deleteOne();
+        res.status(200).json("Recovery code verified successfully");
+      } else {
+        res.status(400).json("Recovery code is wrong or has expired");
+      }
+    } else {
+      res.status(404).json("Recovery code not generated or has expired");
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { newPassword } = req.body;
+    const resetedUser = await User.findByIdAndUpdate(req.recovery.userId, {
+      password: newPassword,
+    });
+    if (resetedUser != null) {
+      res.cookie("recovery", "", {
+        httpOnly: true,
         secure: true,
-        sameSite: "none",
+        expires: new Date(0),
       });
-      res.sendStatus(204);
-    } else {
-      res.sendStatus(404).json("User not found");
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const checkRecoverCode = async (req, res, next) => {
-  try {
-    const { userInfo, recoverCode } = req.body;
-    const foundUser = await User.findOne({
-      $or: [{ email: userInfo }, { username: userInfo }],
-    });
-    if (foundUser != null) {
-      if (foundUser.recoverCode == null)
-        return res.sendStatus(400).json({ message: "No code generated" });
-      const isMatch = await foundUser.compareRecoverCode(recoverCode);
-      if (isMatch) {
-        res.sendStatus(204);
-      } else {
-        res.status(400).json({ message: "Incorrect code" });
-      }
-    } else {
-      res.status(404).json("User not found");
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const recovePassword = async (req, res, next) => {
-  try {
-    const { userInfo, recoverCode, newPassword } = req.body;
-    const patchedUser = await User.findOne({
-      $or: [{ email: userInfo }, { username: userInfo }],
-    });
-    if (patchedUser != null) {
-      if (patchedUser.recoverCode == null)
-        return res.sendStatus(400).json({ message: "No code generated" });
-      const isMatch = await patchedUser.compareRecoverCode(recoverCode);
-      if (isMatch) {
-        patchedUser.password = newPassword;
-        await patchedUser.encryptPassword();
-        patchedUser.recoverCode = null;
-        await patchedUser.save();
-        res.sendStatus(204);
-      } else {
-        res.status(400).json({ message: "Incorrect code" });
-      }
+      res.status(204).json("Password reseted successfully");
     } else {
       res.status(404).json("User not found");
     }

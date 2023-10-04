@@ -1,8 +1,9 @@
-import { Schema, model, models } from "mongoose";
+import pkg from "mongoose";
 import bcrypt from "bcryptjs";
 import { createAccessToken } from "../controllers/jwts.js";
 import { createTransport } from "nodemailer";
-import { cryptoRandomStringAsync } from "crypto-random-string";
+
+const { Schema, model, models } = pkg;
 
 const transporter = createTransport({
   service: "gmail",
@@ -45,23 +46,14 @@ const userSchema = new Schema({
     type: String,
     required: [true, "Password is required"],
   },
-  recoverCode: { type: String, required: false },
 });
 
 userSchema.methods.encryptPassword = async function() {
   this.password = await bcrypt.hash(this.password, 10);
 };
 
-userSchema.methods.encryptRecoverCode = async function() {
-  this.recoverCode = await bcrypt.hash(this.recoverCode, 10);
-};
-
 userSchema.methods.comparePassword = async function(password) {
   return await bcrypt.compare(password, this.password);
-};
-
-userSchema.methods.compareRecoverCode = async function(recoverCode) {
-  return await bcrypt.compare(recoverCode, this.recoverCode);
 };
 
 userSchema.methods.generateToken = async function() {
@@ -71,25 +63,13 @@ userSchema.methods.generateToken = async function() {
   });
 };
 
-userSchema.methods.generateRecoverToken = async function() {
-  return await createAccessToken({
-    id: this._id,
-    username: this.username,
-    subject: "recover",
-  });
-};
-
-userSchema.methods.sendRecoverCode = async function() {
-  this.recoverCode = await cryptoRandomStringAsync({
-    length: 6,
-    type: "alphanumeric",
-  });
-  const info = await transporter.sendMail({
+userSchema.methods.sendRecoveryCode = async function(recoveryCode) {
+  await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: this.email,
     subject: "Account recover",
     text: "Hi son of a bitch",
-    html: `<h1>There it is!</h1><p>your recover code is ${this.recoverCode}</p>`,
+    html: `<h1>There it is!</h1><p>your recover code is ${recoveryCode}</p>`,
   });
 };
 
