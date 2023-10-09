@@ -1,25 +1,28 @@
 import { Problem, States } from "../models/Problem.js";
+import { Tag } from "../models/Tag.js";
 
 export const getProblems = async (req, res, next) => {
   try {
-    const { tags, search, sort, difficulty, state, page } = req.query;
+    const { tags, search, sort, difficulty, page } = req.query;
     const query = {};
     const problemsPerPage = 10;
     if (difficulty) query.difficulty = parseInt(difficulty);
-    if (state) query.state = parseInt(state);
     if (search) {
       query.$or = [
         { title: { $regex: req.query.search, $options: "i" } },
         { statement: { $regex: req.query.search, $options: "i" } },
       ];
     }
-    if (tags) query["tags.name"] = { $all: tags.split(",") };
-
-    console.log(query);
+    if (tags) {
+      const foundTags = await Tag.find({ name: { $in: tags.split(",") } });
+      if (foundTags.length)
+        query.tags = { $in: foundTags.map((tag) => tag._id) };
+    }
 
     const foundProblems = await Problem.find(query)
       .skip((parseInt(page) - 1) * problemsPerPage || 0)
       .limit(problemsPerPage)
+      .populate("tags")
       .sort({ "grades.value": parseInt(sort) || -1 });
 
     res.json(foundProblems);
@@ -55,7 +58,7 @@ export const patchProblemDraft = async (req, res, next) => {
     // validate(req.body) can be the draft patched?
     const patchedProblem = Problem.findOneAndUpdate(
       { _id: req.params.id },
-      req.body,
+      req.body
     );
     if (patchedProblem != null) res.sendStatus(204);
     else res.sendStatus(404);
@@ -69,7 +72,7 @@ export const PublishProblem = async (req, res, next) => {
     // validate(req.body) can be the problem published?
     const PublishedProblem = Problem.findOneAndUpdate(
       { _id: req.params.id },
-      req.body,
+      req.body
     );
     if (PublishedProblem != null) res.sendStatus(204);
     else res.sendStatus(404);

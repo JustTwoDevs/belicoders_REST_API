@@ -14,7 +14,7 @@ const gradeSchema = new Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 export default models.Grade || model("Grade", gradeSchema);
