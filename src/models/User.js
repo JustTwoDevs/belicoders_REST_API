@@ -13,7 +13,7 @@ const transporter = createTransport({
 const userSchema = new Schema({
   name: { type: String, required: [true, "Name is required"] },
   lastname: { type: String, required: [true, "Lastname is required"] },
-  age: { type: Number, required: [true, "Age is required"] },
+  birthDate: { type: Date, required: [true, "Birth Date is required"] },
   nationality: { type: String, required: [true, "Nationality is required"] },
   genre: { type: String, required: [true, "Genre is required"] },
   username: {
@@ -48,7 +48,7 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.methods.encryptPassword = async function () {
+userSchema.methods.encryptPassword = async function() {
   this.password = await bcrypt.hash(this.password, 10);
 };
 
