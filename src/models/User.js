@@ -41,29 +41,29 @@ const userSchema = new Schema({
 
     match: [/^\S+@\S+\.\S+$/, "Please use a valid email address."],
   },
-  number: { type: Number, required: [true, "Number is required"] },
+  number: { type: String, required: [true, "Number is required"] },
   password: {
     type: String,
     required: [true, "Password is required"],
   },
 });
 
-userSchema.methods.encryptPassword = async function() {
+userSchema.methods.encryptPassword = async function () {
   this.password = await bcrypt.hash(this.password, 10);
 };
 
-userSchema.methods.comparePassword = async function(password) {
+userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateToken = async function() {
+userSchema.methods.generateToken = async function () {
   return await createAccessToken({
     id: this._id,
     username: this.username,
   });
 };
 
-userSchema.methods.sendRecoveryCode = async function(recoveryCode) {
+userSchema.methods.sendRecoveryCode = async function (recoveryCode) {
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: this.email,
