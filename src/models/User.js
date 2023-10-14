@@ -48,22 +48,22 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.methods.encryptPassword = async function () {
+userSchema.methods.encryptPassword = async function() {
   this.password = await bcrypt.hash(this.password, 10);
 };
 
-userSchema.methods.comparePassword = async function (password) {
+userSchema.methods.comparePassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateToken = async function () {
+userSchema.methods.generateToken = async function() {
   return await createAccessToken({
     id: this._id,
     username: this.username,
   });
 };
 
-userSchema.methods.sendRecoveryCode = async function (recoveryCode) {
+userSchema.methods.sendRecoveryCode = async function(recoveryCode) {
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: this.email,

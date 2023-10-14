@@ -44,8 +44,8 @@ export const getProblemById = async (req, res, next) => {
 export const createProblemDraft = async (req, res, next) => {
   try {
     // Validate(req.body) can be the problem created?
+    delete req.body.state;
     const newProblem = new Problem(req.body);
-    newProblem.state = States.DRAFT;
     await newProblem.save();
     res.status(201).json({ problemId: newProblem.id });
   } catch (error) {
@@ -58,7 +58,7 @@ export const patchProblemDraft = async (req, res, next) => {
     // validate(req.body) can be the draft patched?
     const patchedProblem = Problem.findOneAndUpdate(
       { _id: req.params.id },
-      req.body
+      req.body,
     );
     if (patchedProblem != null) res.sendStatus(204);
     else res.sendStatus(404);
@@ -67,15 +67,31 @@ export const patchProblemDraft = async (req, res, next) => {
   }
 };
 
-export const PublishProblem = async (req, res, next) => {
+export const publishProblem = async (req, res, next) => {
   try {
     // validate(req.body) can be the problem published?
     const PublishedProblem = Problem.findOneAndUpdate(
       { _id: req.params.id },
-      req.body
+      req.body,
     );
     if (PublishedProblem != null) res.sendStatus(204);
     else res.sendStatus(404);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createTestCases = async (req, res, next) => {
+  try {
+    const foundProblem = await Problem.findById(req.params.problemId);
+    if (foundProblem != null) {
+      if (foundProblem.state !== States.DRAFT) return res.sendStatus(409);
+      const isCreated = foundProblem.createTestCases(req.body.testCasesFile);
+      if (isCreated[0] === true) {
+        await foundProblem.save();
+        res.sendStatus(201);
+      } else return res.status(400).json({ message: isCreated[1] });
+    } else res.sendStatus(404);
   } catch (error) {
     next(error);
   }

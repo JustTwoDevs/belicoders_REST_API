@@ -13,12 +13,23 @@ app.use(
   cors({
     credentials: true,
     origin: "http://localhost:8000",
-  })
+  }),
 );
+
 app.use(json());
 app.use(cookieParser());
 
 // main routers
 app.use("/api/v1", mainRouterV1);
+// Error handling middleware
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  if (err.name === "ValidationError") {
+    res.status(400).json({ error: err.message });
+  }
+  if (err.name === "CastError") {
+    res.status(400).json({ error: err.message });
+  }
+});
 
 export default app;
