@@ -1,10 +1,11 @@
 import { Router } from "express";
 import {
-  PublishProblem,
+  publishProblem,
   createProblemDraft,
   getProblemById,
   getProblems,
   patchProblemDraft,
+  createTestCases,
 } from "../../controllers/problemsController.js";
 
 const problemsRouter = Router();
@@ -13,10 +14,12 @@ problemsRouter.get("/", getProblems);
 
 problemsRouter.get("/:problemId", getProblemById);
 
+problemsRouter.post("/:problemId/pusblish", publishProblem);
+
 problemsRouter.post("/", createProblemDraft);
 
-problemsRouter.patch("/", patchProblemDraft);
+problemsRouter.post("/:problemId/testCases", createTestCases);
 
-problemsRouter.post("/publish", PublishProblem);
+problemsRouter.patch("/:problemId", patchProblemDraft);
 
 export default problemsRouter;
