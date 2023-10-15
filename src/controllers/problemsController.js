@@ -41,11 +41,37 @@ export const getProblemById = async (req, res, next) => {
   }
 };
 
+const findTagsAndCreate = async (tags) => {
+  const foundTags = await Tag.find({ name: { $in: tags } }, "_id name");
+  for (const tag of tags) {
+    if (!foundTags.find((t) => t.name === tag)) {
+      const newTag = await Tag.create({ name: tag });
+      foundTags.push(newTag);
+    }
+  }
+  return foundTags.map((tag) => tag._id);
+};
+
 export const createProblemDraft = async (req, res, next) => {
   try {
     // Validate(req.body) can be the problem created?
-    delete req.body.state;
-    const newProblem = new Problem(req.body);
+    if (!Problem.validateTags(req.body.tags))
+      return res.status(400).json({
+        message: "you should add one and only one type tag sql or algorithm",
+      });
+
+    const tags = await findTagsAndCreate(req.body.tags);
+
+    const problemData = {
+      title: req.body.title,
+      statement: req.body.statement,
+      difficulty: req.body.difficulty,
+      runtime: req.body.runtime,
+      createdBy: req.body.createdBy,
+      tags,
+    };
+
+    const newProblem = new Problem(problemData);
     await newProblem.save();
     res.status(201).json({ problemId: newProblem.id });
   } catch (error) {
@@ -56,9 +82,41 @@ export const createProblemDraft = async (req, res, next) => {
 export const patchProblemDraft = async (req, res, next) => {
   try {
     // validate(req.body) can be the draft patched?
-    const patchedProblem = Problem.findOneAndUpdate(
-      { _id: req.params.id },
-      req.body,
+
+    if (!Problem.validateTags(req.body.tags))
+      return res.status(400).json({
+        message: "you should add one and only one type tag sql or algorithm",
+      });
+
+    const foundProblem = await Problem.findById(req.params.problemId).populate(
+      "tags",
+      "name",
+    );
+    if (foundProblem === null) return res.sendStatus(404);
+    if (foundProblem.state !== States.DRAFT) return res.sendStatus(409);
+    if (
+      foundProblem.tags.find(
+        (tag) => tag.name === "sql" || tag.name === "algorithm",
+      ).name !==
+      req.body.tags.find((tag) => tag === "algorithm" || tag === "sql")
+    )
+      return res.status(409).json({
+        message: "can't change the type of the problem",
+      });
+
+    const tags = await findTagsAndCreate(req.body.tags);
+
+    const problemData = {
+      title: req.body.title,
+      statement: req.body.statement,
+      difficulty: req.body.difficulty,
+      runtime: req.body.runtime,
+      tags,
+    };
+
+    const patchedProblem = await Problem.findOneAndUpdate(
+      { _id: req.params.problemId },
+      problemData,
     );
     if (patchedProblem != null) res.sendStatus(204);
     else res.sendStatus(404);
@@ -70,7 +128,7 @@ export const patchProblemDraft = async (req, res, next) => {
 export const publishProblem = async (req, res, next) => {
   try {
     // validate(req.body) can be the problem published?
-    const PublishedProblem = Problem.findOneAndUpdate(
+    const PublishedProblem = await Problem.findOneAndUpdate(
       { _id: req.params.id },
       req.body,
     );

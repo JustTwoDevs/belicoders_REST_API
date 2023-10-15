@@ -1,6 +1,6 @@
 import { Tag } from "../models/Tag.js";
 
-export const getTags = async (req, res, next) => {
+export const getTags = async (_req, res, next) => {
   try {
     const tags = await Tag.find();
     res.status(200).json(tags);
