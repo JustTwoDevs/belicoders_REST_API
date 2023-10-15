@@ -16,6 +16,7 @@ export const difficulties = Object.freeze({
 });
 
 export const MAX_RUNTIME = 3000;
+export const MIN_RUNTIME = 100;
 
 const problemSchema = new Schema(
   {
@@ -37,6 +38,7 @@ const problemSchema = new Schema(
     runtime: {
       type: Number,
       required: false,
+      min: MIN_RUNTIME,
       max: MAX_RUNTIME,
       default: MAX_RUNTIME,
     },

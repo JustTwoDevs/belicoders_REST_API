@@ -93,7 +93,10 @@ export const patchProblemDraft = async (req, res, next) => {
       "name",
     );
     if (foundProblem === null) return res.sendStatus(404);
-    if (foundProblem.state !== States.DRAFT) return res.sendStatus(409);
+    if (foundProblem.state !== States.DRAFT)
+      return res
+        .status(409)
+        .json({ message: "Can't modify a problem that is already published" });
     if (
       foundProblem.tags.find(
         (tag) => tag.name === "sql" || tag.name === "algorithm",
@@ -128,12 +131,25 @@ export const patchProblemDraft = async (req, res, next) => {
 export const publishProblem = async (req, res, next) => {
   try {
     // validate(req.body) can be the problem published?
-    const PublishedProblem = await Problem.findOneAndUpdate(
-      { _id: req.params.id },
-      req.body,
-    );
-    if (PublishedProblem != null) res.sendStatus(204);
-    else res.sendStatus(404);
+    const foundProblem = await Problem.findById(req.params.problemId);
+    if (foundProblem === null) return res.sendStatus(404);
+    if (foundProblem.state === States.PUBLISHED)
+      return res
+        .status(409)
+        .json({ message: "the problem is already published" });
+    if (
+      !foundProblem.testCasesFile ||
+      !foundProblem.inputCases ||
+      !foundProblem.outputAnswers
+    )
+      return res.status(400).json({
+        message:
+          "you should upload your test cases before you can publish the problem",
+      });
+
+    foundProblem.state = States.PUBLISHED;
+    await foundProblem.save();
+    res.sendStatus(204);
   } catch (error) {
     next(error);
   }

@@ -14,7 +14,7 @@ problemsRouter.get("/", getProblems);
 
 problemsRouter.get("/:problemId", getProblemById);
 
-problemsRouter.post("/:problemId/pusblish", publishProblem);
+problemsRouter.post("/:problemId/publish", publishProblem);
 
 problemsRouter.post("/", createProblemDraft);
 
