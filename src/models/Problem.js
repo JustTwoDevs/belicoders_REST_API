@@ -54,7 +54,16 @@ const problemSchema = new Schema(
       default: States.DRAFT,
     },
     // To search by tags with query string the format is: ?tags=name1, name2, ...
-    tags: [{ type: Schema.Types.ObjectId, ref: "Tag", required: false }],
+    tags: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Tag",
+        required: [
+          true,
+          "you should add at least add sql or algorithm to tags",
+        ],
+      },
+    ],
     discussion: [
       { type: Schema.Types.ObjectId, ref: "Discuss", required: false },
     ],
@@ -69,7 +78,7 @@ const problemSchema = new Schema(
   },
 );
 
-problemSchema.methods.createTestCases = function(testCasesFile) {
+problemSchema.methods.createTestCases = function (testCasesFile) {
   const testCases = testCasesFile.split(";");
   if (testCases.length < 2) return [false, "Test cases are not separated by ;"];
   console.log(testCases);
@@ -84,6 +93,17 @@ problemSchema.methods.createTestCases = function(testCasesFile) {
   this.outputAnswers = testCases.map((testCase) => testCase[1]).join(";");
   this.testCasesFile = testCasesFile;
   return [true];
+};
+
+problemSchema.statics.validateTags = function (tags) {
+  return (
+    !tags ||
+    tags.reduce(
+      (counter, tag) =>
+        tag === "sql" || tag === "algorithm" ? counter + 1 : counter,
+      0,
+    ) === 1
+  );
 };
 
 export const Problem = models.Problem || model("Problem", problemSchema);
