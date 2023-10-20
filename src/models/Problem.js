@@ -25,7 +25,7 @@ const problemSchema = new Schema(
       required: [true, "Title is required"],
       // Remove extra spaces and tabs before it gets to the database.
       set: (value) => value.replace(/\s+/g, " ").trim(),
-      match: /^[a-zA-Z0-9_ ]+$/,
+      match: /^[a-zA-Z0-9_ &]+$/,
     },
     statement: {
       type: String,
@@ -71,7 +71,7 @@ const problemSchema = new Schema(
     ],
     grades: [{ type: Schema.Types.ObjectId, ref: "Grade", required: false }],
     submissions: [
-      { type: Schema.Types.ObjectId, reg: "Submission", required: false },
+      { type: Schema.Types.ObjectId, ref: "Submission", required: false },
     ],
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },

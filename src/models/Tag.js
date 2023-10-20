@@ -7,8 +7,20 @@ const tagSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      trim: true,
       lowercase: true,
+      set: (value) => value.replace(/\s+/g, " ").trim(),
+      maxlength: [15, "The tag name should be less than 15 characters"],
+      validate: [
+        {
+          validator: (value) => /^[a-zA-Z0-9&_]*$/.test(value),
+          message:
+            "Invalid tag name, the name should only contain alphanumeric characters or the special charaters '_' '&'",
+        },
+        {
+          validator: (value) => /^[^\s]*\s?[^\s]*$/.test(value),
+          message: "The tag name should only containt one space",
+        },
+      ],
     },
   },
   {
