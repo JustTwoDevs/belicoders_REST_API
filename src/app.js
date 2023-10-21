@@ -3,7 +3,6 @@ import morgan from "morgan";
 import cors from "cors";
 import mainRouterV1 from "./routes/v1/mainRouterV1.js";
 import cookieParser from "cookie-parser";
-
 const app = express();
 
 // Middlewares
