@@ -1,6 +1,5 @@
-import pkg from "mongoose";
-const { Schema, model, models } = pkg;
-import Question from './Question.js';
+import models, { Schema } from "mongoose";
+import Question from "./Question.js";
 
 const sqlQuerySchema = new Schema({
   statement: {
@@ -13,6 +12,5 @@ const sqlQuerySchema = new Schema({
   },
 });
 
-const SqlQuery = Question.discriminator('SqlQuery', sqlQuerySchema);
-
-export default SqlQuery || model('SqlQuery', sqlQuerySchema);
+export default models.SqlQuery ||
+  Question.discriminator("SqlQuery", sqlQuerySchema);

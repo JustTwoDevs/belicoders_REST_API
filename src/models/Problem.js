@@ -1,6 +1,4 @@
-import pkg from "mongoose";
-
-const { Schema, model, models } = pkg;
+import models, { Schema, model } from "mongoose";
 
 // I'm Defining const for this model.
 
@@ -26,15 +24,12 @@ const problemSchema = new Schema(
       // Remove extra spaces and tabs before it gets to the database.
       set: (value) => value.replace(/\s+/g, " ").trim(),
       match: /^[a-zA-Z0-9_ &]+$/,
+      unique: true,
     },
     statement: {
       type: String,
-      required: [true, "Statement is required"],
       trim: true,
     },
-    testCasesFile: { type: String, required: false },
-    inputCases: { type: String, required: false },
-    outputAnswers: { type: String, required: false },
     runtime: {
       type: Number,
       required: false,
@@ -60,10 +55,6 @@ const problemSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: "Tag",
-        required: [
-          true,
-          "you should add at least add sql or algorithm to tags",
-        ],
       },
     ],
     discussion: [
@@ -108,4 +99,4 @@ problemSchema.statics.validateTags = function (tags) {
   );
 };
 
-export const Problem = models.Problem || model("Problem", problemSchema);
+export default models.Problem || model("Problem", problemSchema);

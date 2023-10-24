@@ -1,5 +1,6 @@
 import { Router } from "express";
 import authMiddleWare from "../../middlewares/authMiddleware.js";
+import userRivalsRouter from "./userRivalsRouter.js";
 import {
   register,
   getProfile,
@@ -17,5 +18,7 @@ userRouter.patch(
   authMiddleWare,
   changePassword,
 );
+
+userRouter("/:userId/rivals", userRivalsRouter);
 
 export default userRouter;

@@ -1,9 +1,7 @@
-import pkg from "mongoose";
+import models, { Schema, model } from "mongoose";
 import { cryptoRandomStringAsync } from "crypto-random-string";
 import bcrypt from "bcryptjs";
 import { createAccessToken } from "../controllers/jwts.js";
-
-const { Schema, model, models } = pkg;
 
 const EXPIRE_TIME = 10;
 
@@ -19,7 +17,7 @@ const RecoveryCodeSchema = new Schema({
   expiresAt: { type: Date },
 });
 
-RecoveryCodeSchema.methods.generateCode = async function() {
+RecoveryCodeSchema.methods.generateCode = async function () {
   this.code = await cryptoRandomStringAsync({
     length: 6,
     type: "alphanumeric",
@@ -29,16 +27,16 @@ RecoveryCodeSchema.methods.generateCode = async function() {
   this.expiresAt = date.setMinutes(date.getMinutes() + EXPIRE_TIME);
 };
 
-RecoveryCodeSchema.methods.encryptRecoveryCode = async function() {
+RecoveryCodeSchema.methods.encryptRecoveryCode = async function () {
   this.code = await bcrypt.hash(this.code, 10);
 };
 
-RecoveryCodeSchema.methods.verifyCode = async function(recoveryCode) {
+RecoveryCodeSchema.methods.verifyCode = async function (recoveryCode) {
   if (this.expiresAt < Date.now()) return false;
   return await bcrypt.compare(recoveryCode, this.code);
 };
 
-RecoveryCodeSchema.methods.generateToken = async function() {
+RecoveryCodeSchema.methods.generateToken = async function () {
   const token = await createAccessToken({
     id: this._id,
     userId: this.userId,

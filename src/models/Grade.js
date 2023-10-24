@@ -1,6 +1,4 @@
-import pkg from "mongoose";
-
-const { Schema, model, models } = pkg;
+import models, { Schema, model } from "mongoose";
 
 const gradeSchema = new Schema(
   {
@@ -14,7 +12,7 @@ const gradeSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default models.Grade || model("Grade", gradeSchema);

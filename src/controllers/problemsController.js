@@ -1,5 +1,5 @@
-import { Problem, States } from "../models/Problem.js";
-import { Tag } from "../models/Tag.js";
+import Problem, { States } from "../models/Problem.js";
+import Tag from "../models/Tag.js";
 
 export const getProblems = async (req, res, next) => {
   try {
