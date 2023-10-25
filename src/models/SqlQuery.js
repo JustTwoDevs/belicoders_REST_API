@@ -16,3 +16,4 @@ const sqlQuerySchema = new Schema({
 const SqlQuery = Question.discriminator('SqlQuery', sqlQuerySchema);
 
 export default SqlQuery || model('SqlQuery', sqlQuerySchema);
+

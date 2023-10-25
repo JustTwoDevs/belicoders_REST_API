@@ -16,16 +16,18 @@ export const listDatabases = (req, res) => {
   });
 };
 
-export const createDatabases = (req, res) => {
+export const createDatabases = async (req, res) => {
   const { script, databaseName } = req.body;
 
-  const scriptDb = mysql.createConnection({
+  const scriptDb = mysql.createConnection ({
     host: "localhost",
     user: process.env.DB_USER, 
     password: process.env.DB_PASSWORD,
     database: databaseName,
   });
-  const createDatabaseQuery = `CREATE DATABASE ${databaseName}`;
+  
+    const createDatabaseSQL = 'CREATE DATABASE ??';
+    await connection.execute(createDatabaseSQL, [databaseName]);
     
   db.query(createDatabaseQuery, (err) => {
     if (err) {
