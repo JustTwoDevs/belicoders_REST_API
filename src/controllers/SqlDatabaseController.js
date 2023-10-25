@@ -1,6 +1,5 @@
 import mysql from "mysql2";
-import db from "./sqlDatabase.js";
-
+import db from "#databaseConnections/mysqlConnection.js";
 
 export const listDatabases = (req, res) => {
   console.log("listDatabases");
@@ -21,20 +20,18 @@ export const createDatabases = (req, res) => {
 
   const scriptDb = mysql.createConnection({
     host: "localhost",
-    user: process.env.DB_USER, 
+    user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: databaseName,
   });
   const createDatabaseQuery = `CREATE DATABASE ${databaseName}`;
-    
+
   db.query(createDatabaseQuery, (err) => {
     if (err) {
-      res.status(500).json({ error: 'Error creating the database', err });
-      return;
+      res.status(500).json({ error: "Error creating the database", err });
     }
-
   });
- 
+
   scriptDb.query(`USE ${databaseName}`, (useErr) => {
     if (useErr) {
       console.error("Error changing to the database", useErr);

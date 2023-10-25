@@ -3,7 +3,7 @@ import {
   getTags,
   getTagsByName,
   createTag,
-} from "../../controllers/tagController.js";
+} from "#controllers/tagsController.js";
 
 const tagRouter = Router();
 

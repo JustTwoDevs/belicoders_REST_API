@@ -1,7 +1,8 @@
-import {Router} from "express";
+import { Router } from "express";
 import {
-     createSqlQuestion, listSqlQuestions
-} from "../../controllers/sqlQuestionsController.js";
+     createSqlQuestion,
+     listSqlQuestions,
+} from "#controllers/sqlQuestionsController.js";
 
 const sqlQueryRouter = Router();
 

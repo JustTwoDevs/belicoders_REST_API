@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   generateRecoveryCode,
   regenerateRecoveryCode,
-} from "../../controllers/recoveryCodesController.js";
+} from "#controllers/recoveryCodesController.js";
 
 const recoveryCodesRouter = Router();
 

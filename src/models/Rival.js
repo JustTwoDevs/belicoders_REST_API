@@ -1,6 +1,4 @@
-import pkg from "mongoose";
-
-const { Schema, model, models } = pkg;
+import models, { Schema, model } from "mongoose";
 
 // I'm Defining const for this model.
 
@@ -18,7 +16,7 @@ export const difficulties = Object.freeze({
 export const MAX_RUNTIME = 3000;
 export const MIN_RUNTIME = 100;
 
-const problemSchema = new Schema(
+const rivalSchema = new Schema(
   {
     title: {
       type: String,
@@ -26,15 +24,16 @@ const problemSchema = new Schema(
       // Remove extra spaces and tabs before it gets to the database.
       set: (value) => value.replace(/\s+/g, " ").trim(),
       match: /^[a-zA-Z0-9_ &]+$/,
+      unique: true,
     },
+    // Valentina, este es el markdown que se muestra en el apartado de solución del front-end.
+    solutionMD: { type: String },
     statement: {
       type: String,
-      required: [true, "Statement is required"],
       trim: true,
     },
-    testCasesFile: { type: String, required: false },
-    inputCases: { type: String, required: false },
-    outputAnswers: { type: String, required: false },
+    solutionCode: { type: String },
+    expectedOutput: { type: String },
     runtime: {
       type: Number,
       required: false,
@@ -60,10 +59,6 @@ const problemSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: "Tag",
-        required: [
-          true,
-          "you should add at least add sql or algorithm to tags",
-        ],
       },
     ],
     discussion: [
@@ -80,32 +75,4 @@ const problemSchema = new Schema(
   },
 );
 
-problemSchema.methods.createTestCases = function (testCasesFile) {
-  const testCases = testCasesFile.split(";");
-  if (testCases.length < 2) return [false, "Test cases are not separated by ;"];
-  console.log(testCases);
-  for (let i = 0; i < testCases.length; i++) {
-    testCases[i] = testCases[i].split(":");
-    if (testCases[i].length !== 2)
-      return [false, "input and output are not separated by :"];
-  }
-  console.log(testCases);
-
-  this.inputCases = testCases.map((testCase) => testCase[0]).join(";");
-  this.outputAnswers = testCases.map((testCase) => testCase[1]).join(";");
-  this.testCasesFile = testCasesFile;
-  return [true];
-};
-
-problemSchema.statics.validateTags = function (tags) {
-  return (
-    !tags ||
-    tags.reduce(
-      (counter, tag) =>
-        tag === "sql" || tag === "algorithm" ? counter + 1 : counter,
-      0,
-    ) === 1
-  );
-};
-
-export const Problem = models.Problem || model("Problem", problemSchema);
+export default models.Rival || model("Rival", rivalSchema);

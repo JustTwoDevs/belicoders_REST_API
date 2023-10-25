@@ -1,5 +1,5 @@
 import "dotenv/config.js";
-import "./database.js";
+import "#databaseConnections/mongoConnection.js";
 import app from "./app.js";
 
 app.listen(process.env.SERVER_PORT, () => {
