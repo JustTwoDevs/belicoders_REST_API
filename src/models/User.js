@@ -1,9 +1,7 @@
-import pkg from "mongoose";
+import models, { Schema, model } from "mongoose";
 import bcrypt from "bcryptjs";
-import { createAccessToken } from "../controllers/jwts.js";
+import { createAccessToken } from "#controllers/jwts.js";
 import { createTransport } from "nodemailer";
-
-const { Schema, model, models } = pkg;
 
 const transporter = createTransport({
   service: "gmail",

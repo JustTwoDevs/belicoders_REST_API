@@ -1,6 +1,4 @@
-import pkg from "mongoose";
-
-const { Schema, model, models } = pkg;
+import models, { Schema, model } from "mongoose";
 
 const submissionSchema = new Schema(
   {

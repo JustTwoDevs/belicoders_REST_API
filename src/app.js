@@ -21,12 +21,18 @@ app.use(cookieParser());
 // main routers
 app.use("/api/v1", mainRouterV1);
 // Error handling middleware
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   console.error(err.stack);
   if (err.name === "ValidationError") {
     res.status(400).json({ error: err.message });
   }
   if (err.name === "CastError") {
+    res.status(400).json({ error: err.message });
+  }
+  if (
+    err.name === "MongoServerError" &&
+    err.message.includes("duplicate key")
+  ) {
     res.status(400).json({ error: err.message });
   }
 });

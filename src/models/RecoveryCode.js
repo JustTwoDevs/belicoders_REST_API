@@ -1,9 +1,7 @@
-import pkg from "mongoose";
+import models, { Schema, model } from "mongoose";
 import { cryptoRandomStringAsync } from "crypto-random-string";
 import bcrypt from "bcryptjs";
-import { createAccessToken } from "../controllers/jwts.js";
-
-const { Schema, model, models } = pkg;
+import { createAccessToken } from "#controllers/jwts.js";
 
 const EXPIRE_TIME = 10;
 
