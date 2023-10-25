@@ -1,6 +1,6 @@
 import { Router } from "express";
-import recoveryMiddleware from "../../middlewares/recoveryMiddleware.js";
-import authMiddleware from "../../middlewares/authMiddleware.js";
+import recoveryMiddleware from "#middlewares/authorization/recoveryMiddleware.js";
+import authMiddleware from "#middlewares/authorization/authMiddleware.js";
 import {
   login,
   logout,
