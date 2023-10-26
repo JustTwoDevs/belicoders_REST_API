@@ -1,5 +1,5 @@
-import RecoveryCode from "../models/RecoveryCode.js";
-import User from "../models/User.js";
+import RecoveryCode from "#models/RecoveryCode.js";
+import User from "#models/User.js";
 
 export const generateRecoveryCode = async (req, res, next) => {
   try {

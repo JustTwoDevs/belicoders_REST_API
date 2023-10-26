@@ -1,5 +1,5 @@
-import SqlQuery from "../models/SqlQuery.js";
-import db from "../sqlDatabase.js";
+import SqlQuery from "#models/SqlQuery.js";
+import db from "#databaseConnections/mysqlConnection.js";
 
 export const createSqlQuestion = async (req, res, next) => {
   try {

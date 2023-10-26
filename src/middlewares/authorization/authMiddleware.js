@@ -15,7 +15,12 @@ const authMiddleware = (req, res, next) => {
           .json({ message: "Authorization token is not valid" });
       }
       req.user = user;
-      next();
+      if (!req.params.userId) next();
+      else if (req.params.userId === user.id) next();
+      else
+        return res
+          .status(403)
+          .json({ message: "You are not allowed to access this endpoint" });
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
