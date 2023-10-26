@@ -24,8 +24,8 @@ export const createSqlRivalDraft = async (req, res, next) => {
     const tags = await findTagsAndCreate(req.body.tags);
 
     const problemData = {
-      title: req.body.sqlScript,
-      type: req.body.title,
+      sqlScript: req.body.sqlScript,
+      title: req.body.title,
       description: req.body.statement,
       rivals: req.body.difficulty,
       runtime: req.body.runtime,
