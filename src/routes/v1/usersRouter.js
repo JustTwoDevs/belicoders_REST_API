@@ -7,6 +7,7 @@ import {
   patchProfile,
   changePassword,
 } from "../../controllers/usersController.js";
+import userRivalsRouter from "./userRivalsRouter.js";
 
 const userRouter = Router();
 
@@ -19,6 +20,11 @@ userRouter.patch(
   changePassword,
 );
 
-userRouter.use("/:userId/algorithmRivals", userAlgorithmRivalsRouter);
+userRouter.use("/:userId/rivals", authMiddleWare, userRivalsRouter);
+userRouter.use(
+  "/:userId/algorithmRivals",
+  authMiddleWare,
+  userAlgorithmRivalsRouter,
+);
 
 export default userRouter;

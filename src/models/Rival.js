@@ -23,7 +23,7 @@ const rivalSchema = new Schema(
       required: [true, "Title is required"],
       // Remove extra spaces and tabs before it gets to the database.
       set: (value) => value.replace(/\s+/g, " ").trim(),
-      match: /^[a-zA-Z0-9_ &]+$/,
+      match: /^[a-zA-Z0-9_ &']+$/,
       unique: true,
     },
     // Valentina, este es el markdown que se muestra en el apartado de solución del front-end.

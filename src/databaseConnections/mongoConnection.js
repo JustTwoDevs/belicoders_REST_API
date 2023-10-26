@@ -11,6 +11,7 @@ connect(process.env.DATABASE_URL, {
       (error, stdout, stderr) => {
         if (error) {
           console.log(`error: ${error.message}`);
+          console.log("Hay gente así");
           return;
         }
         if (stderr) {
