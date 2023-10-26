@@ -8,6 +8,7 @@ export const patchSqlRivalValidator = async (req, res, next) => {
     if (!foundRival) {
       return res.sendStatus(404);
     }
+   
 
     if (foundRival.state !== States.DRAFT) {
       return res.status(409).json({ message: "The rival is not a draft" });

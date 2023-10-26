@@ -9,6 +9,7 @@ export const createSqlRivalDraft = async (req, res, next) => {
   try {
     // Validate(req.body) can be the problem created?
     const problemData = {
+    databaseName: req.body.databaseName,
       title: req.body.title,
       solutionMD: req.body.solutionMD,
       statement: req.body.statement,
@@ -32,8 +33,6 @@ export const createSqlRivalDraft = async (req, res, next) => {
 export const publishSqlRival = async (req, res, next) => {
   try {
     const foundRival = req.foundRival;
-    // mover validacion para el validator correspondiente
-    if (foundRival == null) return res.sendStatus(404);
     foundRival.state = States.PUBLISHED;
 
     await req.foundRival.save();

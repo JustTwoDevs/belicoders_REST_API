@@ -14,5 +14,6 @@ algorithmRivalSchema.methods.generateExpectedOutput = function() {
   this.expectedOutput = outputBuffer.toString();
 };
 
+
 export default models.AlgorithmRival ||
   Rival.discriminator("AlgorithmRival", algorithmRivalSchema);
