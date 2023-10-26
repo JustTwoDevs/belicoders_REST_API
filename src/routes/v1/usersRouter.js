@@ -1,17 +1,17 @@
 import { Router } from "express";
 import authMiddleWare from "#middlewares/authorization/authMiddleware.js";
-import userAlgorithmRivalsRouter from "./userAlgorithmRivalsRouter.js";
 import {
   register,
   getProfile,
   patchProfile,
   changePassword,
 } from "../../controllers/usersController.js";
-import userRivalsRouter from "./userRivalsRouter.js";
+import userIdRouter from "./userIdRouter.js";
 
 const userRouter = Router();
 
 userRouter.post("/register", register);
+// Probablemente hay que meterlo dentro de userIdRouter
 userRouter.get("/profile/:userId", authMiddleWare, getProfile);
 userRouter.patch("/profile/:userId", authMiddleWare, patchProfile);
 userRouter.patch(
@@ -20,11 +20,6 @@ userRouter.patch(
   changePassword,
 );
 
-userRouter.use("/:userId/rivals", authMiddleWare, userRivalsRouter);
-userRouter.use(
-  "/:userId/algorithmRivals",
-  authMiddleWare,
-  userAlgorithmRivalsRouter,
-);
+userRouter.use("/:userId", authMiddleWare, userIdRouter);
 
 export default userRouter;

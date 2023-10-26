@@ -83,3 +83,15 @@ export const getUserRivalById = async (req, res, next) => {
     next(error);
   }
 };
+
+export const findTagsAndCreate = async (tags) => {
+  if (!tags) return [];
+  const foundTags = await Tag.find({ name: { $in: tags } }, "_id name");
+  for (const tag of tags) {
+    if (!foundTags.find((t) => t.name === tag)) {
+      const newTag = await Tag.create({ name: tag });
+      foundTags.push(newTag);
+    }
+  }
+  return foundTags.map((tag) => tag._id);
+};

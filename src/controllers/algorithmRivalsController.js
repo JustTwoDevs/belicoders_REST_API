@@ -1,18 +1,6 @@
 import { States } from "#models/Rival.js";
-import Tag from "#models/Tag.js";
 import AlgorithmRival from "#models/AlgorithmRival.js";
-
-const findTagsAndCreate = async (tags) => {
-  if (!tags) return [];
-  const foundTags = await Tag.find({ name: { $in: tags } }, "_id name");
-  for (const tag of tags) {
-    if (!foundTags.find((t) => t.name === tag)) {
-      const newTag = await Tag.create({ name: tag });
-      foundTags.push(newTag);
-    }
-  }
-  return foundTags.map((tag) => tag._id);
-};
+import { findTagsAndCreate } from "./rivalsController.js";
 
 export const createAlgorithmRivalDraft = async (req, res, next) => {
   try {
