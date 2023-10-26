@@ -27,6 +27,7 @@ const rivalSchema = new Schema(
       unique: true,
     },
     // Valentina, este es el markdown que se muestra en el apartado de solución del front-end.
+    
     solutionMD: { type: String },
     statement: {
       type: String,

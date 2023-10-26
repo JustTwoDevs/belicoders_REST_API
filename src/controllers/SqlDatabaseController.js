@@ -61,3 +61,18 @@ export const createDatabases = async (req, res) => {
     });
   });
 };
+
+export const deleteDatabases = (req, res) => {
+  const { databaseName } = req.body;
+  const query = "DROP DATABASE ??";
+  db.query(query, [databaseName], (err) => {
+    if (err) {
+      console.error("Error deleting the database:", err);
+      res.status(500).json({ error: "Error deleting the database" });
+      return;
+    }
+    res.json({
+      message: "Database deleted successfully",
+    });
+  });
+}
