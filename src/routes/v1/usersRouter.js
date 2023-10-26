@@ -1,28 +1,25 @@
 import { Router } from "express";
 import authMiddleWare from "#middlewares/authorization/authMiddleware.js";
-import userAlgorithmRivalsRouter from "./userAlgorithmRivalsRouter.js";
-import userSqlRivalRouter from "./userSqlRivalsRouter.js";
-import UserSqlContestRouter from "./UserSqlContestRouter.js";
 import {
   register,
   getProfile,
   patchProfile,
   changePassword,
 } from "../../controllers/usersController.js";
+import userIdRouter from "./userIdRouter.js";
 
 const userRouter = Router();
 
 userRouter.post("/register", register);
+// Probablemente hay que meterlo dentro de userIdRouter
 userRouter.get("/profile/:userId", authMiddleWare, getProfile);
 userRouter.patch("/profile/:userId", authMiddleWare, patchProfile);
 userRouter.patch(
   "/profile/:userId/changePassword",
   authMiddleWare,
-  changePassword
+  changePassword,
 );
 
-userRouter.use("/:userId/algorithmRivals", userAlgorithmRivalsRouter);
-userRouter.use("/:userId/sqlRivals", userSqlRivalRouter);
-userRouter.use("/:userId/sqlContests", UserSqlContestRouter)
+userRouter.use("/:userId", authMiddleWare, userIdRouter);
 
 export default userRouter;

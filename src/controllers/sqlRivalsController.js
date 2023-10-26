@@ -1,57 +1,45 @@
 import { States } from "../models/Rival.js";
-import Tag from "../models/Tag.js";
 import SqlRival from "../models/SqlRival.js";
 import Submission from "#models/Submission.js";
 import Discuss from "#models/Discuss.js";
 import Grade from "#models/Grade.js";
-
-const findTagsAndCreate = async (tags) => {
-  if (!tags) return [];
-  const foundTags = await Tag.find({ name: { $in: tags } }, "_id name");
-  for (const tag of tags) {
-    if (!foundTags.find((t) => t.name === tag)) {
-      const newTag = await Tag.create({ name: tag });
-      foundTags.push(newTag);
-    }
-  }
-  return foundTags.map((tag) => tag._id);
-};
+import { findTagsAndCreate } from "./rivalsController.js";
 
 export const createSqlRivalDraft = async (req, res, next) => {
   try {
     // Validate(req.body) can be the problem created?
-
-    const tags = await findTagsAndCreate(req.body.tags);
-
     const problemData = {
-      sqlScript: req.body.sqlScript,
+    databaseName: req.body.databaseName,
       title: req.body.title,
-      description: req.body.statement,
-      rivals: req.body.difficulty,
+      solutionMD: req.body.solutionMD,
+      statement: req.body.statement,
+      creationScript: req.body.creationScript,
+      solutionCode: req.body.solutionCode,
+      difficulty: req.body.difficulty,
       runtime: req.body.runtime,
-      createdBy: req.params.userId,
-      tags,
+      createdBy: req.user.id,
+      tags: await findTagsAndCreate(req.body.tags),
     };
 
-    const newRival = SqlRival.create(problemData);
-    res.status(201).json({ problemId: newRival.id });
+    const newRival = new SqlRival(problemData);
+    await newRival.generateExpectedOutput();
+    await newRival.save();
+    res.status(201).json({ newRival });
   } catch (error) {
     next(error);
   }
 };
 
 export const publishSqlRival = async (req, res, next) => {
-    try {
-        const foundRival = req.foundRival;
+  try {
+    const foundRival = req.foundRival;
+    foundRival.state = States.PUBLISHED;
 
-        if (foundRival == null) return res.sendStatus(404);
-        foundRival.state= States.PUBLISHED;
-    
-        await req.foundRival.save();
-        res.sendStatus(200);
-      } catch (error) {
-        next(error);
-      }
+    await req.foundRival.save();
+    res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const patchSqlRivalDraft = async (req, res, next) => {
@@ -60,14 +48,18 @@ export const patchSqlRivalDraft = async (req, res, next) => {
 
     const tags = await findTagsAndCreate(req.body.tags);
 
-    foundRival.title = req.body.title;
-    foundRival.statement = req.body.statement;
-    foundRival.difficulty = req.body.difficulty;
-    foundRival.runtime = req.body.runtime;
-    foundRival.tags = tags;
-    foundRival.creationScript = req.body.sqlScript;
+    if (foundRival.title) foundRival.title = req.body.title;
+    if (foundRival.statement) foundRival.statement = req.body.statement;
+    if (foundRival.difficulty) foundRival.difficulty = req.body.difficulty;
+    if (foundRival.runtime) foundRival.runtime = req.body.runtime;
+    if (foundRival.tags) foundRival.tags = tags;
+    if (foundRival.creationScript)
+      foundRival.creationScript = req.body.creationScript;
+    if (foundRival.solutionCode)
+      foundRival.solutionCode = req.body.solutionCode;
+    await foundRival.generateExpectedOutput();
     await foundRival.save();
-    res.sendStatus(200);
+    res.status(200).json({ foundRival });
   } catch (error) {
     next(error);
   }
@@ -80,7 +72,7 @@ export const getSqlRivals = async (_req, res, next) => {
   } catch (error) {
     next(error);
   }
-};  
+};
 
 export const dropSqlRival = async (req, res, next) => {
   try {
@@ -94,4 +86,3 @@ export const dropSqlRival = async (req, res, next) => {
     next(error);
   }
 };
-

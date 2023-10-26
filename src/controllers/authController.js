@@ -1,5 +1,5 @@
-import User from "../models/User.js";
-import RecoveryCode from "../models/RecoveryCode.js";
+import User from "#models/User.js";
+import RecoveryCode from "#models/RecoveryCode.js";
 
 export const login = async (req, res, next) => {
   try {
@@ -92,7 +92,7 @@ export const resetPassword = async (req, res, next) => {
       {
         password: newPassword,
       },
-      { new: true }
+      { new: true },
     );
     if (resetedUser != null) {
       await resetedUser.encryptPassword();
