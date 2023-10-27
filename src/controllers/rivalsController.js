@@ -1,29 +1,18 @@
+import Discuss from "#models/Discuss.js";
 import Rival from "#models/Rival.js";
 import Tag from "#models/Tag.js";
 
 export const getRivals = async (req, res, next) => {
   try {
-    const { tags, search, sort, difficulty, page } = req.query;
+    const { tags } = req.query;
     const query = {};
-    const rivalsPerPage = 10;
-    if (difficulty) query.difficulty = parseInt(difficulty);
-    if (search) {
-      query.$or = [
-        { title: { $regex: req.query.search, $options: "i" } },
-        { statement: { $regex: req.query.search, $options: "i" } },
-      ];
-    }
     if (tags) {
       const foundTags = await Tag.find({ name: { $in: tags.split(",") } });
       if (foundTags.length)
         query.tags = { $in: foundTags.map((tag) => tag._id) };
     }
 
-    const foundRivals = await Rival.find(query)
-      .skip((parseInt(page) - 1) * rivalsPerPage || 0)
-      .limit(rivalsPerPage)
-      .populate("tags")
-      .sort({ "grades.value": parseInt(sort) || -1 });
+    const foundRivals = await Rival.find(query).populate("createdBy");
 
     res.json(foundRivals);
   } catch (error) {
@@ -31,9 +20,34 @@ export const getRivals = async (req, res, next) => {
   }
 };
 
-export const getRivalById = async (req, res, next) => {
+export const getRivalByName = async (req, res, next) => {
   try {
-    const foundRival = await Rival.findById(req.params.rivalId);
+    const name = req.params.rivalName.replace(/-/g, " ");
+    console.log(name);
+    const foundRival = await Rival.findOne({
+      title: name,
+    })
+      .populate("createdBy")
+      .populate("tags", "name")
+      .populate("grades")
+      .populate({
+        path: "discussion",
+        populate: {
+          path: "userId",
+          select: "username",
+        },
+      })
+      .populate({
+        path: "discussion",
+        populate: {
+          path: "replies",
+          populate: {
+            path: "userId",
+            select: "username",
+          },
+        },
+      })
+      .exec();
     if (foundRival != null) res.json(foundRival);
     else res.sendStatus(404);
   } catch (error) {
@@ -94,4 +108,23 @@ export const findTagsAndCreate = async (tags) => {
     }
   }
   return foundTags.map((tag) => tag._id);
+};
+
+export const createDiscuss = async (req, res, next) => {
+  try {
+    const { content } = req.body;
+    const name = req.params.rivalName.replace(/-/g, " ");
+    const foundRival = await Rival.findOne({ title: name });
+    if (foundRival) {
+      const newDiscuss = await Discuss.create({
+        content,
+        userId: req.user.id,
+      });
+      foundRival.discussion.push(newDiscuss._id);
+      await foundRival.save();
+      res.json(newDiscuss);
+    } else res.sendStatus(404);
+  } catch (error) {
+    next(error);
+  }
 };

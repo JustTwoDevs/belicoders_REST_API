@@ -8,9 +8,9 @@ export const States = Object.freeze({
 });
 
 export const difficulties = Object.freeze({
-  EASY: 1,
-  MEDIUM: 2,
-  HARD: 3,
+  EASY: "Easy",
+  MEDIUM: "Medium",
+  HARD: "Hard",
 });
 
 export const MAX_RUNTIME = 3000;
@@ -42,7 +42,7 @@ const rivalSchema = new Schema(
       default: MAX_RUNTIME,
     },
     difficulty: {
-      type: Number,
+      type: String,
       required: [true, "Difficulty is required"],
       // enum takes a list of values that can be setted to the field,
       // in this case, the values are the values of the difficulties constants object.
@@ -65,6 +65,7 @@ const rivalSchema = new Schema(
       { type: Schema.Types.ObjectId, ref: "Discuss", required: false },
     ],
     grades: [{ type: Schema.Types.ObjectId, ref: "Grade", required: false }],
+    avgGrade: { type: Number, required: false },
     submissions: [
       { type: Schema.Types.ObjectId, ref: "Submission", required: false },
     ],
@@ -72,7 +73,7 @@ const rivalSchema = new Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 export default models.Rival || model("Rival", rivalSchema);
