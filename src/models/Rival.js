@@ -3,8 +3,8 @@ import models, { Schema, model } from "mongoose";
 // I'm Defining const for this model.
 
 export const States = Object.freeze({
-  DRAFT: 0,
-  PUBLISHED: 1,
+  DRAFT: "Draft",
+  PUBLISHED: "Published",
 });
 
 export const difficulties = Object.freeze({
@@ -49,7 +49,7 @@ const rivalSchema = new Schema(
       enum: Object.values(difficulties),
     },
     state: {
-      type: Number,
+      type: String,
       required: false,
       enum: Object.values(States),
       default: States.DRAFT,
@@ -73,7 +73,7 @@ const rivalSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default models.Rival || model("Rival", rivalSchema);

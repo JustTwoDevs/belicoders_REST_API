@@ -1,5 +1,5 @@
 import Discuss from "#models/Discuss.js";
-import Rival from "#models/Rival.js";
+import Rival, {States} from "#models/Rival.js";
 import Tag from "#models/Tag.js";
 
 export const getRivals = async (req, res, next) => {
@@ -100,8 +100,9 @@ export const getUserRivalById = async (req, res, next) => {
 
 export const findTagsAndCreate = async (tags) => {
   if (!tags) return [];
-  const foundTags = await Tag.find({ name: { $in: tags } }, "_id name");
-  for (const tag of tags) {
+  const lowerTags = tags.map(tag => tag.toLowerCase());
+  const foundTags = await Tag.find({ name: { $in: lowerTags } }, "_id name");
+  for (const tag of lowerTags) {
     if (!foundTags.find((t) => t.name === tag)) {
       const newTag = await Tag.create({ name: tag });
       foundTags.push(newTag);
@@ -124,6 +125,22 @@ export const createDiscuss = async (req, res, next) => {
       await foundRival.save();
       res.json(newDiscuss);
     } else res.sendStatus(404);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteRivalDraft = async (req, res, next) => {
+  try {
+    const foundRival = await Rival.findOne({
+      _id: req.params.rivalId,
+      createdBy: req.user.id,
+    });
+    if (foundRival === null) return res.sendStatus(404);
+    if (foundRival.state !== States.DRAFT)
+      return res.status(409).json({ message: "The problem is not a draft" });
+    await foundRival.delete();
+    res.sendStatus(200);
   } catch (error) {
     next(error);
   }

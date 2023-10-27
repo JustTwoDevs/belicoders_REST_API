@@ -82,19 +82,3 @@ export const patchAlgorithmRivalDraft = async (req, res, next) => {
     next(error);
   }
 };
-
-export const deleteAlgorithmRivalDraft = async (req, res, next) => {
-  try {
-    const foundRival = await AlgorithmRival.findOne({
-      _id: req.params.rivalId,
-      createdBy: req.user.id,
-    });
-    if (foundRival === null) return res.sendStatus(404);
-    if (foundRival.state !== States.DRAFT)
-      return res.status(409).json({ message: "The problem is not a draft" });
-    await foundRival.delete();
-    res.sendStatus(200);
-  } catch (error) {
-    next(error);
-  }
-};
