@@ -12,19 +12,21 @@ export const createSqlRivalDraft = async (req, res, next) => {
     databaseName: req.body.databaseName,
       title: req.body.title,
       solutionMD: req.body.solutionMD,
-      statement: req.body.statement,
-      creationScript: req.body.creationScript,
+       statement: req.body.statement,
+       creationScript: req.body.creationScript,
       solutionCode: req.body.solutionCode,
-      difficulty: req.body.difficulty,
-      runtime: req.body.runtime,
-      createdBy: req.user.id,
-      tags: await findTagsAndCreate(req.body.tags),
-    };
+       difficulty: req.body.difficulty,
+       runtime: req.body.runtime,
+       createdBy: req.user.id,
+       tags: await findTagsAndCreate(req.body.tags),
+     };
 
     const newRival = new SqlRival(problemData);
-    await newRival.generateExpectedOutput();
-    await newRival.save();
-    res.status(201).json({ newRival });
+     newRival.generateExpectedOutput();
+   
+      await newRival.save();
+      res.status(201).json({ newRival });
+    
   } catch (error) {
     next(error);
   }
@@ -57,7 +59,6 @@ export const patchSqlRivalDraft = async (req, res, next) => {
       foundRival.creationScript = req.body.creationScript;
     if (foundRival.solutionCode)
       foundRival.solutionCode = req.body.solutionCode;
-    await foundRival.generateExpectedOutput();
     await foundRival.save();
     res.status(200).json({ foundRival });
   } catch (error) {

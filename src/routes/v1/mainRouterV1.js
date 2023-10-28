@@ -22,5 +22,4 @@ mainRouterV1.use("/sqlRivals", sqlRivalsRouter);
 mainRouterV1.use("/recoveryCodes", recoveryCodesRouter);
 mainRouterV1.use("/databases", sqlDatabaseRouter);
 mainRouterV1.use("/discuss", discussRouter);
-
 export default mainRouterV1;
