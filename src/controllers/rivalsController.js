@@ -1,5 +1,5 @@
 import Discuss from "#models/Discuss.js";
-import Rival, {States} from "#models/Rival.js";
+import Rival, { States } from "#models/Rival.js";
 import Tag from "#models/Tag.js";
 
 export const getRivals = async (req, res, next) => {
@@ -11,9 +11,9 @@ export const getRivals = async (req, res, next) => {
       if (foundTags.length)
         query.tags = { $in: foundTags.map((tag) => tag._id) };
     }
+    query.state = "Published";
 
     const foundRivals = await Rival.find(query).populate("createdBy");
-
     res.json(foundRivals);
   } catch (error) {
     next(error);
@@ -100,7 +100,7 @@ export const getUserRivalById = async (req, res, next) => {
 
 export const findTagsAndCreate = async (tags) => {
   if (!tags) return [];
-  const lowerTags = tags.map(tag => tag.toLowerCase());
+  const lowerTags = tags.map((tag) => tag.toLowerCase());
   const foundTags = await Tag.find({ name: { $in: lowerTags } }, "_id name");
   for (const tag of lowerTags) {
     if (!foundTags.find((t) => t.name === tag)) {
