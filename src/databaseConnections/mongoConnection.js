@@ -1,25 +1,10 @@
 import { connect } from "mongoose";
-import { exec } from "child_process";
 
 connect(process.env.DATABASE_URL, {
   useUnifiedTopology: true,
   useNewUrlParser: true,
 })
   .then(() => {
-    exec(
-      "cowsay -f stegosaurus database connected",
-      (error, stdout, stderr) => {
-        if (error) {
-          console.log(`error: ${error.message}`);
-          console.log("Hay gente así");
-          return;
-        }
-        if (stderr) {
-          console.log(`stderr: ${stderr}`);
-          return;
-        }
-        console.log(`stdout: ${stdout}`);
-      },
-    );
+    console.log("Connected to MongoDB :D");
   })
   .catch((err) => console.log(err));

@@ -1,5 +1,5 @@
-import models, { Schema, model } from "mongoose";
-
+import pkg from "mongoose";
+const { models, Schema, model } = pkg;
 // I'm Defining const for this model.
 
 export const States = Object.freeze({

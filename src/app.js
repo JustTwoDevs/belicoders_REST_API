@@ -21,8 +21,7 @@ app.use(cookieParser());
 // main routers
 app.use("/api/v1", mainRouterV1);
 // Error handling middleware
-app.use(function(err, req, res, next) {
-  console.error(err.stack);
+app.use(function (err, req, res, next) {
   if (err.name === "ValidationError") {
     res.status(400).json({ error: err.message });
   }
@@ -35,6 +34,7 @@ app.use(function(err, req, res, next) {
   ) {
     res.status(400).json({ error: err.message });
   }
+  next(err);
 });
 
 export default app;

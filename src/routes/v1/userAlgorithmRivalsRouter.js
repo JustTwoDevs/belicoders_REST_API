@@ -8,6 +8,6 @@ const userAlgorithmRivalsRouter = Router({ mergeParams: true });
 
 userAlgorithmRivalsRouter.post("/", createAlgorithmRivalDraft);
 userAlgorithmRivalsRouter.patch("/:rivalId", patchAlgorithmRivalDraft);
-userAlgorithmRivalsRouter.post("/:rivalId", publishAlgorithmRival);
+userAlgorithmRivalsRouter.post("/:rivalId/publish", publishAlgorithmRival);
 
 export default userAlgorithmRivalsRouter;

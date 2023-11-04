@@ -5,7 +5,6 @@ import {
   getProfile,
   patchProfile,
   changePassword,
-
 } from "../../controllers/usersController.js";
 import userIdRouter from "./userIdRouter.js";
 
@@ -22,5 +21,4 @@ userRouter.patch(
 );
 
 userRouter.use("/:userId", authMiddleWare, userIdRouter);
-
 export default userRouter;
