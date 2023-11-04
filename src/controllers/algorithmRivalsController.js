@@ -18,7 +18,7 @@ export const createAlgorithmRivalDraft = async (req, res, next) => {
 
     const newAlgorithmRival = new AlgorithmRival(rivalData);
     // Generate expected output
-    newAlgorithmRival.generateExpectedOutput();
+    newAlgorithmRival.generateExpectedOutput(req.user);
     await newAlgorithmRival.save();
     res.status(201).json({ newAlgorithmRival });
   } catch (error) {
