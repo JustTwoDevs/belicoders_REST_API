@@ -13,6 +13,7 @@ export const getContests = async (_req, res, next) => {
 // Should we LowerCase the title?
 export const getContestByTitle = async (req, res, next) => {
   try {
+    req.contest = await req.contest.populate("rivals");
     res.status(200).json(req.contest);
   } catch (error) {
     next(error);
