@@ -60,7 +60,7 @@ async function validateRequest(res, body, validate, errors) {
 
 async function validateDocument(res, model, query, populate, validate, errors) {
   const document =
-    populate.length > 0
+    populate?.length > 0
       ? await models[model].findOne(query).populate(populate)
       : await models[model].findOne(query);
   if (!document) {
