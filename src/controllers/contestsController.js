@@ -3,7 +3,10 @@ import { States } from "#models/Rival.js";
 
 export const getContests = async (_req, res, next) => {
   try {
-    const contests = await Contest.find({ state: States.PUBLISHED });
+    const contests = await Contest.find({ state: States.PUBLISHED }).populate(
+      "createdBy",
+      "name",
+    );
     res.status(200).json(contests);
   } catch (error) {
     next(error);
@@ -46,6 +49,7 @@ export const createContestDraft = async (req, res, next) => {
       createdBy: req.user.id,
     };
     const contest = new Contest(contestData);
+    contest.calculateContestKind();
     await contest.save();
     res.status(201).json(contest);
   } catch (error) {
@@ -58,7 +62,7 @@ export const patchContestDraft = async (req, res, next) => {
     if (req.body.title) req.contest.title = req.body.title;
     if (req.body.description) req.contest.description = req.body.description;
     if (req.body.rivals) req.contest.rivals = req.body.rivals;
-    req.contest.kind = calculateContestKind(req.contest.rivals);
+    req.contest.calculateContestKind();
     const savedContest = await req.contest.save();
     res.status(200).json(savedContest);
   } catch (error) {
@@ -66,26 +70,9 @@ export const patchContestDraft = async (req, res, next) => {
   }
 };
 
-const calculateContestKind = (rivals) => {
-  let algorithmFlag = false;
-  let sqlFlag = false;
-  for (const rival of rivals) {
-    if (rival.__t === "AlgorithmRival") {
-      if (sqlFlag) break;
-      else algorithmFlag = true;
-    } else if (rival.__t === "SqlRival") {
-      if (algorithmFlag) break;
-      else sqlFlag = true;
-    }
-  }
-  if (algorithmFlag && sqlFlag) return "Miscellaneous";
-  if (algorithmFlag) return "Algorithm";
-  if (sqlFlag) return "SQL";
-};
-
 export const publishContest = async (req, res, next) => {
   try {
-    req.contest.kind = calculateContestKind(req.contest.rivals);
+    req.contest.calculateContestKind();
     req.contest.state = States.PUBLISHED;
     const savedContest = await req.contest.save();
     res.status(200).json(savedContest);
