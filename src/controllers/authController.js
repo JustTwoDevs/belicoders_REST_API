@@ -92,7 +92,7 @@ export const resetPassword = async (req, res, next) => {
       {
         password: newPassword,
       },
-      { new: true },
+      { new: true }
     );
     if (resetedUser != null) {
       await resetedUser.encryptPassword();
