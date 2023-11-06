@@ -4,6 +4,7 @@ import {
   publishSqlRival,
   patchSqlRivalDraft,
   dropSqlRival,
+  compareUserSolution
 } from "#controllers/sqlRivalsController.js";
 import {
   publishSqlRivalValidator,
@@ -20,5 +21,6 @@ userSqlRivalRouter.patch(
   patchSqlRivalDraft,
 );
 userSqlRivalRouter.delete("/:rivalId", dropSqlRival);
+userSqlRivalRouter.post("/submit", compareUserSolution);
 
 export default userSqlRivalRouter;

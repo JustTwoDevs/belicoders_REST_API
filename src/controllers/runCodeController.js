@@ -1,5 +1,7 @@
 import { execSync } from "child_process";
 import { writeFileSync, unlinkSync } from "fs";
+import db from "#databaseConnections/mysqlConnection.js";
+
 
 export const runAlgorithmCode = async (req, res) => {
   const { inputCases, solutionCode, userCode } = req.body;
@@ -33,12 +35,26 @@ export const runAlgorithmCode = async (req, res) => {
 };
 
 export const runSQLCode = async (req, res) => {
-  const { creationScript, databaseName, solutionCode, userCode } = req.body;
+  const { creationScript, databaseName, userCode } = req.body;
   if (
-    solutionCode === undefined ||
     creationScript === undefined ||
     databaseName === undefined ||
     userCode === undefined
   )
-    return res.status(400).json({ message: "No code or input cases" });
+    return res.status(400).json({ message: "Escribe algún código" });
+
+  try {
+    db.execute(creationScript, function (err) {
+      if (err) return res.status(400).json({ message: err });
+      db.query(`USE ${databaseName}; ${userCode}`, function (err, result) {
+        if (err) return res.status(400).json({ message: err });
+        return res.status(200).json({ result });
+      });
+    });
+
+    db.query(`DROP DATABASE ${databaseName}`);
+  } catch (err) {
+    const errorOutput = err.message;
+    return res.status(200).json({ errorOutput });
+  }
 };

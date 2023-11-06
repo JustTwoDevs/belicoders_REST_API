@@ -9,37 +9,51 @@ const sqlRivalSchema = new Schema({
 });
 
 sqlRivalSchema.methods.generateExpectedOutput = function () {
-  if (this.creationScript === "" || this.databaseName === "")
+  if (this.creationScript === "" || this.databaseName === "" || this.solutionCode === "" )
     this.expectedOutput = "";
   try {
-    db.execute(this.creationScript, (err) => {
-      if (err) {
-        console.error("Error creating the database", err);
-      } else {
-        db.query(`USE ${this.databaseName}`, (useErr) => {
-          if (useErr) {
-            console.error("Error changing to the database", useErr);
-          }
-          db.query(this.solutionCode, (scriptErr, rows) => {
+  
+          db.query(this.solutionCode, (scriptErr, result ) => {
             if (scriptErr) {
-              console.error("There is an error in your script:", scriptErr);
+              this.expectedOutput = scriptErr.message;
             }
-
-            const expectedOutput = JSON.stringify(rows);
-
+            const expectedOutput = JSON.stringify(result);
             this.expectedOutput = expectedOutput;
           });
-        });
-      }
-    });
+      
   } catch (error) {
     console.error("Error generating expected output:", error);
     throw error;
   }
 };
 
-sqlRivalSchema.pre("save", function (next) {
-  this.generateExpectedOutput();
+sqlRivalSchema.methods.runCreationScript = function(){
+  if (this.creationScript === "" || this.databaseName === "")
+    return;
+  db.execute(this.creationScript, (scriptErr) => {
+    if (scriptErr) {
+      console.error("There is an error in your script:", scriptErr);
+    }
+  });
+  db.query(`USE ${this.databaseName}`, (useErr) => {
+    if (useErr) {
+      console.error("Error changing to the database", useErr);
+    }});
+}
+
+sqlRivalSchema.methods.dropDatabase = function(){
+  db.query(`DROP DATABASE ${this.databaseName}`, (dropErr) => {
+      if (dropErr) {
+        console.error("Error dropping the database", dropErr);
+      }
+    });
+}
+
+
+sqlRivalSchema.pre("save", async function  (next) {
+ await  this.runCreationScript();
+ await  this.generateExpectedOutput();
+ await this.dropDatabase();
 
   next();
 });

@@ -5,6 +5,7 @@ import Discuss from "#models/Discuss.js";
 import Grade from "#models/Grade.js";
 import { findTagsAndCreate } from "./rivalsController.js";
 
+
 export const createSqlRivalDraft = async (req, res, next) => {
   try {
     const problemData = {
@@ -85,3 +86,42 @@ export const dropSqlRival = async (req, res, next) => {
     next(error);
   }
 };
+
+export const compareUserSolution = async (req, res, rival) => {
+  try {
+    const { userSolution } = req.body;
+    if (userSolution === undefined || userSolution === null){
+      return res.status(400).json({ message: "write some code" });
+    }
+    const expectedOutput = rival.expectedOutput;
+   result= db.query(userSolution, async (error)=>{
+      if (error) {
+        rival.submissions.push({
+          UserId:req.user.id , 
+          code: userSolution,
+          output: error.message, 
+          state: 1
+        })
+        await rival.save();
+        return res.status(200).json({ error: "There is an error in your query", err: error });
+      }
+    })
+
+    const isCorrect = JSON.stringify(result) === expectedOutput;
+    const submission = {
+      userId: req.user.id,
+      code: userSolution,
+      output: result,
+      state: isCorrect ? 1 : 0,
+    };
+    rival.submissions.push(submission);
+    await rival.save();
+   return res.status(200).json({code:result, valid:isCorrect})
+  } catch (error) {
+    return res.status(500).json({ message: "Error comparing solutions :" });
+  }
+};
+
+
+
+

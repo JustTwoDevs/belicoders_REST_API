@@ -7,7 +7,6 @@ import rivalsRouter from "./rivalsRouter.js";
 import algorithmRivalsRouter from "./algorithmRivalsRouter.js";
 import sqlRivalsRouter from "./sqlRivalsRouter.js";
 import recoveryCodesRouter from "./recoveryCodesRouter.js";
-import sqlDatabaseRouter from "./sqlDatabasesRouter.js";
 import discussRouter from "./discussRouter.js";
 import runCodeRouter from "./runCodeRouter.js";
 
@@ -21,7 +20,6 @@ mainRouterV1.use("/rivals", rivalsRouter);
 mainRouterV1.use("/algorithmRivals", algorithmRivalsRouter);
 mainRouterV1.use("/sqlRivals", sqlRivalsRouter);
 mainRouterV1.use("/recoveryCodes", recoveryCodesRouter);
-mainRouterV1.use("/databases", sqlDatabaseRouter);
 mainRouterV1.use("/discuss", discussRouter);
 mainRouterV1.use("/runCode", runCodeRouter);
 export default mainRouterV1;

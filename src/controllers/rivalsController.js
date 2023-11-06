@@ -99,7 +99,8 @@ export const getUserRivalById = async (req, res, next) => {
 };
 
 export const findTagsAndCreate = async (tags) => {
-  if (!tags) return [];
+  if (!tags) return []
+
   const lowerTags = tags.map((tag) => tag.toLowerCase());
   const foundTags = await Tag.find({ name: { $in: lowerTags } }, "_id name");
   for (const tag of lowerTags) {
