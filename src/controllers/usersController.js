@@ -2,22 +2,6 @@ import User from "#models/User.js";
 
 export const register = async (req, res, next) => {
   try {
-    const { email, username } = req.body;
-
-    const userFound = await User.findOne({
-      $or: [{ email }, { username }],
-    });
-
-    if (userFound?.email === email)
-      return res.status(400).json({
-        message: "The email is already in use",
-      });
-
-    if (userFound?.username === username)
-      return res.status(400).json({
-        message: "The username is already in use",
-      });
-
     const newUser = new User(req.body);
     await newUser.encryptPassword();
     const userSaved = await newUser.save();

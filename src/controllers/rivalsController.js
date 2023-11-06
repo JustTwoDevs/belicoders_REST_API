@@ -1,6 +1,9 @@
 import Discuss from "#models/Discuss.js";
 import Rival, { States } from "#models/Rival.js";
 import Tag from "#models/Tag.js";
+import { execSync } from "child_process";
+import { writeFileSync, unlinkSync } from "fs";
+import Submission, { States as SubmissionStates } from "#models/Submission.js";
 
 export const getRivals = async (req, res, next) => {
   try {
@@ -11,7 +14,7 @@ export const getRivals = async (req, res, next) => {
       if (foundTags.length)
         query.tags = { $in: foundTags.map((tag) => tag._id) };
     }
-    query.state = "Published";
+    query.state = States.PUBLISHED;
 
     const foundRivals = await Rival.find(query).populate("createdBy");
     res.json(foundRivals);
@@ -20,12 +23,12 @@ export const getRivals = async (req, res, next) => {
   }
 };
 
-export const getRivalByName = async (req, res, next) => {
+export const getRivalByTitle = async (req, res, next) => {
   try {
-    const name = req.params.rivalName.replace(/-/g, " ");
-    console.log(name);
+    const title = req.params.rivalTitle.replace(/-/g, " ");
     const foundRival = await Rival.findOne({
-      title: name,
+      title,
+      state: States.PUBLISHED,
     })
       .populate("createdBy")
       .populate("tags", "name")
@@ -49,7 +52,6 @@ export const getRivalByName = async (req, res, next) => {
       })
       .exec();
     if (foundRival != null) res.json(foundRival);
-    else res.sendStatus(404);
   } catch (error) {
     next(error);
   }
@@ -114,8 +116,8 @@ export const findTagsAndCreate = async (tags) => {
 export const createDiscuss = async (req, res, next) => {
   try {
     const { content } = req.body;
-    const name = req.params.rivalName.replace(/-/g, " ");
-    const foundRival = await Rival.findOne({ title: name });
+    const title = req.params.rivalTitle.replace(/-/g, " ");
+    const foundRival = await Rival.findOne({ title });
     if (foundRival) {
       const newDiscuss = await Discuss.create({
         content,
@@ -144,4 +146,98 @@ export const deleteRivalDraft = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const submission = async (req, res, next) => {
+  try {
+    const title = req.params.rivalTitle.replace(/-/g, " ");
+    const foundRival = await Rival.findOne({ title });
+    if (!foundRival) return res.sendStatus(404);
+    if (foundRival.__t === "AlgorithmRival")
+      submissionAlgorithm(req, res, foundRival);
+    else if (foundRival.__t === "SQLRival") submissionSQL(req, res, foundRival);
+    else res.sendStatus(404);
+  } catch (error) {
+    res.sendStatus(500).json({ message: error.message });
+  }
+};
+
+const submissionAlgorithm = async (req, res, rival) => {
+  const { userCode } = req.body;
+  if (userCode === undefined)
+    return res.status(400).json({ message: "No code" });
+  const inputCases = rival.inputCases;
+  const solutionCode = rival.solutionCode;
+  const runTime = rival.runTime;
+  try {
+    writeFileSync(`${req.user.id}.txt`, inputCases);
+    writeFileSync(`${req.user.id}.py`, userCode);
+    writeFileSync(`solutionCode.py`, solutionCode);
+    const outputUser = execSync(
+      `python ${req.user.id}.py < ${req.user.id}.txt`,
+      { timeout: runTime }
+    );
+    const userOutput = outputUser.toString();
+    const outputSolution = execSync(
+      `python solutionCode.py < ${req.user.id}.txt`,
+      { timeout: runTime }
+    );
+    const solutionOutput = outputSolution.toString();
+    unlinkSync(`${req.user.id}.txt`);
+    unlinkSync(`${req.user.id}.py`);
+    unlinkSync(`solutionCode.py`);
+
+    const newSubmission = await Submission.create({
+      code: userCode,
+      state:
+        userOutput === solutionOutput
+          ? SubmissionStates.ACCEPTED
+          : SubmissionStates.WRONG_ANSWER,
+      output: "",
+      userId: req.user.id,
+    });
+
+    rival.submissions.push(newSubmission._id);
+    await rival.save();
+    await newSubmission.save();
+    newSubmission.submission = true;
+
+    return res.status(200).json({ ...newSubmission._doc, submission: true });
+  } catch (err) {
+    const errorOutput = err.message;
+    unlinkSync(`${req.user.id}.py`);
+    unlinkSync(`${req.user.id}.txt`);
+    unlinkSync(`solutionCode.py`);
+    const newSubmission = await Submission.create({
+      code: userCode,
+      state: errorOutput.includes("ENOBUFS")
+        ? SubmissionStates.RUNTIME_ERROR
+        : SubmissionStates.COMPILATION_ERROR,
+      output: errorOutput.includes("ENOBUFS") ? "" : errorOutput,
+      userId: req.user.id,
+    });
+
+    rival.submissions.push(newSubmission._id);
+    await rival.save();
+
+    await newSubmission.save();
+    return res.status(200).json({ ...newSubmission._doc, submission: true });
+  }
+};
+
+const submissionSQL = async (req, res, rival) => {};
+
+export const getSubmissions = async (req, res, next) => {
+  const rival = await Rival.findOne({
+    _id: req.params.rivalId,
+  }).populate("submissions");
+
+  if (!rival) return res.sendStatus(404);
+
+  const submissions = rival.submissions.filter(
+    (submission) => submission.userId.toString() === req.user.id
+  );
+
+  if (submissions.length === 0) return res.sendStatus(404);
+  res.json(submissions);
 };

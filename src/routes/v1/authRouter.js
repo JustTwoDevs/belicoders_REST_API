@@ -11,7 +11,7 @@ import {
 const authRouter = Router();
 
 authRouter.post("/login", login);
-authRouter.post("/logout", logout);
+authRouter.post("/logout", authMiddleware, logout);
 authRouter.post("/verifyRecoveryCode", verifyRecoveryCode);
 authRouter.post("/resetPassword", recoveryMiddleware, resetPassword);
 authRouter.post("/verify", authMiddleware, (req, res) => {
