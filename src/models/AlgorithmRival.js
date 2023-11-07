@@ -1,8 +1,8 @@
 import Rival from "./Rival.js";
+import { writeFileSync, unlinkSync } from "fs";
 import { execSync } from "child_process";
 import pkg from "mongoose";
 const { models, Schema } = pkg;
-import { writeFileSync, unlinkSync } from "fs";
 
 const algorithmRivalSchema = new Schema({
   inputCases: { type: String },

@@ -5,6 +5,7 @@ const mysqlConnection = mysql.createConnection({
   user: process.env.SQL_DB_USER,
   password: process.env.SQL_DB_PASSWORD,
   database: "information_schema",
+  multipleStatements: true,
 });
 
 mysqlConnection.connect((err) => {
