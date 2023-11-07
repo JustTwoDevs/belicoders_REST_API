@@ -101,7 +101,7 @@ export const getUserRivalById = async (req, res, next) => {
 };
 
 export const findTagsAndCreate = async (tags) => {
-  if (!tags) return []
+  if (!tags) return [];
 
   const lowerTags = tags.map((tag) => tag.toLowerCase());
   const foundTags = await Tag.find({ name: { $in: lowerTags } }, "_id name");
@@ -168,25 +168,18 @@ const submissionAlgorithm = async (req, res, rival) => {
   if (userCode === undefined)
     return res.status(400).json({ message: "No code" });
   const inputCases = rival.inputCases;
-  const solutionCode = rival.solutionCode;
   const runTime = rival.runTime;
+  const solutionOutput = rival.expectedOutput;
   try {
     writeFileSync(`${req.user.id}.txt`, inputCases);
     writeFileSync(`${req.user.id}.py`, userCode);
-    writeFileSync(`solutionCode.py`, solutionCode);
     const outputUser = execSync(
       `python ${req.user.id}.py < ${req.user.id}.txt`,
       { timeout: runTime }
     );
     const userOutput = outputUser.toString();
-    const outputSolution = execSync(
-      `python solutionCode.py < ${req.user.id}.txt`,
-      { timeout: runTime }
-    );
-    const solutionOutput = outputSolution.toString();
     unlinkSync(`${req.user.id}.txt`);
     unlinkSync(`${req.user.id}.py`);
-    unlinkSync(`solutionCode.py`);
 
     const newSubmission = await Submission.create({
       code: userCode,
@@ -206,9 +199,9 @@ const submissionAlgorithm = async (req, res, rival) => {
     return res.status(200).json({ ...newSubmission._doc, submission: true });
   } catch (err) {
     const errorOutput = err.message;
+    await new Promise((resolve) => setTimeout(resolve, 100));
     unlinkSync(`${req.user.id}.py`);
     unlinkSync(`${req.user.id}.txt`);
-    unlinkSync(`solutionCode.py`);
     const newSubmission = await Submission.create({
       code: userCode,
       state: errorOutput.includes("ENOBUFS")
