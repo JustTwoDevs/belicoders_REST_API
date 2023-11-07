@@ -15,8 +15,7 @@ const userSqlRivalRouter = Router();
 
 userSqlRivalRouter.post("/", createSqlRivalDraft);
 userSqlRivalRouter.post("/:rivalId", publishSqlRivalValidator, publishSqlRival);
-userSqlRivalRouter.patch(
-  "/:rivalId",
+userSqlRivalRouter.patch( "/:rivalId",
   patchSqlRivalValidator,
   patchSqlRivalDraft,
 );

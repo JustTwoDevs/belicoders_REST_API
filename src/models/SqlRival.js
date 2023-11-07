@@ -12,7 +12,7 @@ sqlRivalSchema.methods.generateExpectedOutput = function () {
   if (this.creationScript === "" || this.databaseName === "" || this.solutionCode === "" )
     this.expectedOutput = "";
   try {
-  
+      
           db.query(this.solutionCode, (scriptErr, result ) => {
             if (scriptErr) {
               this.expectedOutput = scriptErr.message;
@@ -30,15 +30,21 @@ sqlRivalSchema.methods.generateExpectedOutput = function () {
 sqlRivalSchema.methods.runCreationScript = function(){
   if (this.creationScript === "" || this.databaseName === "")
     return;
-  db.execute(this.creationScript, (scriptErr) => {
-    if (scriptErr) {
-      console.error("There is an error in your script:", scriptErr);
-    }
-  });
+  db.execute(`CREATE DATABASE ${this.databaseName}`);
   db.query(`USE ${this.databaseName}`, (useErr) => {
     if (useErr) {
       console.error("Error changing to the database", useErr);
-    }});
+      }
+    }
+  );
+  db.query(this.creationScript , (scriptErr) => {
+    if (scriptErr) {
+      this.expectedOutput = scriptErr.message;
+      console.error("There is an error in your script:", scriptErr);
+    }}
+  );
+
+
 }
 
 sqlRivalSchema.methods.dropDatabase = function(){
@@ -53,7 +59,7 @@ sqlRivalSchema.methods.dropDatabase = function(){
 sqlRivalSchema.pre("save", async function  (next) {
  await  this.runCreationScript();
  await  this.generateExpectedOutput();
- await this.dropDatabase();
+await this.dropDatabase();
 
   next();
 });

@@ -4,6 +4,7 @@ import Submission from "#models/Submission.js";
 import Discuss from "#models/Discuss.js";
 import Grade from "#models/Grade.js";
 import { findTagsAndCreate } from "./rivalsController.js";
+import db from "#databaseConnections/mysqlConnection.js";
 
 
 export const createSqlRivalDraft = async (req, res, next) => {
@@ -22,8 +23,6 @@ export const createSqlRivalDraft = async (req, res, next) => {
     };
 
     const newRival = new SqlRival(problemData);
-    newRival.generateExpectedOutput();
-
     await newRival.save();
     res.status(201).json({ newRival });
   } catch (error) {
@@ -58,6 +57,7 @@ export const patchSqlRivalDraft = async (req, res, next) => {
       foundRival.creationScript = req.body.creationScript;
     if (foundRival.solutionCode)
       foundRival.solutionCode = req.body.solutionCode;
+
     await foundRival.save();
     res.status(200).json({ foundRival });
   } catch (error) {
@@ -94,7 +94,7 @@ export const compareUserSolution = async (req, res, rival) => {
       return res.status(400).json({ message: "write some code" });
     }
     const expectedOutput = rival.expectedOutput;
-   result= db.query(userSolution, async (error)=>{
+   const result= db.query(userSolution, async (error)=>{
       if (error) {
         rival.submissions.push({
           UserId:req.user.id , 

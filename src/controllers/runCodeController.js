@@ -39,22 +39,23 @@ export const runSQLCode = async (req, res) => {
   if (
     creationScript === undefined ||
     databaseName === undefined ||
-    userCode === undefined
-  )
-    return res.status(400).json({ message: "Escribe algún código" });
-
+    userCode === undefined  
+  ){
+    return res.status(400).json({ message: "write some code" });
+  }
+    
   try {
-    db.execute(creationScript, function (err) {
-      if (err) return res.status(400).json({ message: err });
-      db.query(`USE ${databaseName}; ${userCode}`, function (err, result) {
-        if (err) return res.status(400).json({ message: err });
-        return res.status(200).json({ result });
-      });
+    
+    db.execute(`CREATE DATABASE ${databaseName}`);
+    db.query(`USE ${databaseName};${creationScript}`)
+    db.query(userCode, (error, result) => {
+      if(error) return res.status(200).json({  errorOutput: error.message });
+      return res.status(200).json( {result, message:'query run succesfully'} );
     });
-
+  
     db.query(`DROP DATABASE ${databaseName}`);
   } catch (err) {
     const errorOutput = err.message;
-    return res.status(200).json({ errorOutput });
+   console.error(errorOutput);
   }
 };
