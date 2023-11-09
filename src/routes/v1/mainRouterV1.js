@@ -9,6 +9,8 @@ import sqlRivalsRouter from "./sqlRivalsRouter.js";
 import recoveryCodesRouter from "./recoveryCodesRouter.js";
 import discussRouter from "./discussRouter.js";
 import runCodeRouter from "./runCodeRouter.js";
+import authMiddleware from "#middlewares/authorization/authMiddleware.js";
+import userResourcesRouter from "./userResourcesRouter.js";
 
 const mainRouterV1 = Router();
 
@@ -22,4 +24,5 @@ mainRouterV1.use("/sqlRivals", sqlRivalsRouter);
 mainRouterV1.use("/recoveryCodes", recoveryCodesRouter);
 mainRouterV1.use("/discuss", discussRouter);
 mainRouterV1.use("/runCode", runCodeRouter);
+mainRouterV1.use(authMiddleware, userResourcesRouter);
 export default mainRouterV1;
