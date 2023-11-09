@@ -6,7 +6,6 @@ import {
   patchProfile,
   changePassword,
 } from "../../controllers/usersController.js";
-import userIdRouter from "./userIdRouter.js";
 import { registerValidator } from "#middlewares/validators/usersValidators.js";
 
 const userRouter = Router();
@@ -18,8 +17,7 @@ userRouter.patch("/profile/:userId", authMiddleWare, patchProfile);
 userRouter.patch(
   "/profile/:userId/changePassword",
   authMiddleWare,
-  changePassword
+  changePassword,
 );
 
-userRouter.use("/:userId", authMiddleWare, userIdRouter);
 export default userRouter;
