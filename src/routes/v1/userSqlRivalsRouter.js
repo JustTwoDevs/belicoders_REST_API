@@ -3,8 +3,8 @@ import {
   createSqlRivalDraft,
   publishSqlRival,
   patchSqlRivalDraft,
-  dropSqlRival,
-  compareUserSolution
+  dropSqlRival, 
+  getSqlRivals
 } from "#controllers/sqlRivalsController.js";
 import {
   publishSqlRivalValidator,
@@ -13,6 +13,7 @@ import {
 
 const userSqlRivalRouter = Router();
 
+userSqlRivalRouter.get("/", getSqlRivals);
 userSqlRivalRouter.post("/", createSqlRivalDraft);
 userSqlRivalRouter.post("/:rivalId", publishSqlRivalValidator, publishSqlRival);
 userSqlRivalRouter.patch( "/:rivalId",
@@ -20,6 +21,6 @@ userSqlRivalRouter.patch( "/:rivalId",
   patchSqlRivalDraft,
 );
 userSqlRivalRouter.delete("/:rivalId", dropSqlRival);
-userSqlRivalRouter.post("/submit", compareUserSolution);
+
 
 export default userSqlRivalRouter;
