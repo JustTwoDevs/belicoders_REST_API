@@ -4,6 +4,8 @@ import Tag from "#models/Tag.js";
 import { execSync } from "child_process";
 import { writeFileSync, unlinkSync } from "fs";
 import Submission, { States as SubmissionStates } from "#models/Submission.js";
+import { executeQuery } from "#databaseConnections/mysqlConnection.js";
+
 
 export const getRivals = async (req, res, next) => {
   try {
@@ -156,7 +158,7 @@ export const submission = async (req, res, next) => {
     if (!foundRival) return res.sendStatus(404);
     if (foundRival.__t === "AlgorithmRival")
       submissionAlgorithm(req, res, foundRival);
-    else if (foundRival.__t === "SQLRival") submissionSQL(req, res, foundRival);
+    else if (foundRival.__t === "SqlRival") submissionSQL(req, res, foundRival);
     else res.sendStatus(404);
   } catch (error) {
     res.sendStatus(500).json({ message: error.message });
@@ -219,7 +221,64 @@ const submissionAlgorithm = async (req, res, rival) => {
   }
 };
 
-const submissionSQL = async (req, res, rival) => {};
+const submissionSQL = async (req, res, rival) => {
+  const {userCode } = req.body;
+  if (userCode === undefined || userCode === null){
+    return res.status(400).json({ message: "write some code" });
+  }
+  try {
+   
+   const expectedOutput= rival.expectedOutput;
+    await executeQuery({
+      query: `CREATE DATABASE ${rival.databaseName}`,
+      useExecute:true
+    });
+   await  executeQuery({
+      query: `USE ${rival.databaseName};${rival.creationScript}`,
+      useExecute:false
+    });
+   const result= await executeQuery({
+      query: userCode, useExecute:false
+    })
+
+      executeQuery({query: `DROP DATABASE ${rival.databaseName}`, useExecute:true});
+      const isCorrect = JSON.stringify(result) === expectedOutput;
+      
+      const newSubmission = await Submission.create(
+        {
+          userId: req.user.id,
+          code: userCode,
+          output: JSON.stringify(result),
+          state: isCorrect ? SubmissionStates.ACCEPTED : SubmissionStates.WRONG_ANSWER,
+        }
+      );
+      rival.submissions.push(newSubmission._id);
+      await rival.save();
+      await newSubmission.save();
+      return res.status(200).json({ ...newSubmission._doc, submission: true });
+    
+   
+  } catch (error){
+    
+      console.log("entre a error")
+      const newSubmission = await Submission.create(
+        {
+          userId:req.user.id , 
+          code: userCode,
+          output: error.message, 
+          state: SubmissionStates.COMPILATION_ERROR
+        }
+      );
+
+      rival.submissions.push(newSubmission._id);
+      await rival.save();
+      await newSubmission.save();
+      newSubmission.submission = true;
+    
+      return res.status(200).json({ ...newSubmission._doc, submission: true });
+    } 
+  
+};
 
 export const getSubmissions = async (req, res, next) => {
   const rival = await Rival.findOne({
@@ -231,6 +290,8 @@ export const getSubmissions = async (req, res, next) => {
   const submissions = rival.submissions.filter(
     (submission) => submission.userId.toString() === req.user.id
   );
+
+  
 
   if (submissions.length === 0) return res.sendStatus(404);
   res.json(submissions);

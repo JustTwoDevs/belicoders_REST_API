@@ -1,6 +1,6 @@
 import pkg from "mongoose";
 import Rival from "./Rival.js";
-import db from "#databaseConnections/mysqlConnection.js";
+import {executeQuery} from "#databaseConnections/mysqlConnection.js";
 const { Schema, models } = pkg;
 
 const sqlRivalSchema = new Schema({
@@ -8,60 +8,61 @@ const sqlRivalSchema = new Schema({
   databaseName: { type: String, required: false },
 });
 
-sqlRivalSchema.methods.generateExpectedOutput = function () {
-  if (this.creationScript === "" || this.databaseName === "" || this.solutionCode === "" )
+sqlRivalSchema.methods.generateExpectedOutput =async function () {
+  if (this.solutionCode === "" )
     this.expectedOutput = "";
   try {
       
-          db.query(this.solutionCode, (scriptErr, result ) => {
-            if (scriptErr) {
-              this.expectedOutput = scriptErr.message;
-            }
-            const expectedOutput = JSON.stringify(result);
-            this.expectedOutput = expectedOutput;
+       const result = await  executeQuery({
+            query: this.solutionCode, useExecute:false
           });
+          this.expectedOutput = JSON.stringify(result);
+          
       
   } catch (error) {
-    console.error("Error generating expected output:", error);
-    throw error;
+    this.expectedOutput = error.message;
   }
 };
 
 sqlRivalSchema.methods.runCreationScript = function(){
-  if (this.creationScript === "" || this.databaseName === "")
+  try {
+    if (this.creationScript === "" || this.databaseName === "")
     return;
-  db.execute(`CREATE DATABASE ${this.databaseName}`);
-  db.query(`USE ${this.databaseName}`, (useErr) => {
-    if (useErr) {
-      console.error("Error changing to the database", useErr);
-      }
-    }
-  );
-  db.query(this.creationScript , (scriptErr) => {
-    if (scriptErr) {
-      this.expectedOutput = scriptErr.message;
-      console.error("There is an error in your script:", scriptErr);
-    }}
-  );
-
-
+  executeQuery({query: `CREATE DATABASE ${this.databaseName}`, useExecute:true});
+  executeQuery({query: `USE ${this.databaseName}`, useExecute:false});
+  
+  } catch (error) {
+    console.log("error creation database", error.message);
+    
+  }
+ 
 }
 
 sqlRivalSchema.methods.dropDatabase = function(){
-  db.query(`DROP DATABASE ${this.databaseName}`, (dropErr) => {
-      if (dropErr) {
-        console.error("Error dropping the database", dropErr);
-      }
-    });
+  try{
+    executeQuery({query: `DROP DATABASE ${this.databaseName}`, useExecute:true});
+  } catch (error) {
+    console.log("error dropping database", error.message);
+  }
+ 
 }
 
 
 sqlRivalSchema.pre("save", async function  (next) {
- await  this.runCreationScript();
+  try {
+    if (this.isModified("solutionCode")) {
+      await  this.runCreationScript();
  await  this.generateExpectedOutput();
 await this.dropDatabase();
 
-  next();
+    }
+   
+next();
+  } 
+ catch(error){
+  throw new Error('Error executing previous functions to save: ' + error.message);
+ }
+
 });
 
 export default models.SqlRival ||
