@@ -11,6 +11,6 @@ userResourcesRouter.use("/myRivals", userRivalsRouter);
 userResourcesRouter.use("/myAlgorithmRivals", userAlgorithmRivalsRouter);
 userResourcesRouter.use("/mySqlRivals", userSqlRivalRouter);
 userResourcesRouter.use("/myContests", userContestsRouter);
-userResourcesRouter.use("/myProfile" , userProfileRouter );
+userResourcesRouter.use("/myProfile", userProfileRouter);
 
 export default userResourcesRouter;
