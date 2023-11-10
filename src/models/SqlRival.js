@@ -12,7 +12,7 @@ sqlRivalSchema.methods.generateExpectedOutput =async function () {
   if (this.solutionCode === "" )
     this.expectedOutput = "";
   try {
-      
+    await  executeQuery({query: `USE ${this.databaseName}`, useExecute:false});
        const result = await  executeQuery({
             query: this.solutionCode, useExecute:false
           });
@@ -24,12 +24,12 @@ sqlRivalSchema.methods.generateExpectedOutput =async function () {
   }
 };
 
-sqlRivalSchema.methods.runCreationScript = function(){
+sqlRivalSchema.methods.runCreationScript = async function(){
   try {
-    if (this.creationScript === "" || this.databaseName === "")
-    return;
-  executeQuery({query: `CREATE DATABASE ${this.databaseName}`, useExecute:true});
-  executeQuery({query: `USE ${this.databaseName}`, useExecute:false});
+    if (this.creationScript === "" || this.databaseName === "") return;
+   
+  await executeQuery({query: `CREATE DATABASE ${this.databaseName}`, useExecute:true});
+ 
   
   } catch (error) {
     console.log("error creation database", error.message);
@@ -38,9 +38,9 @@ sqlRivalSchema.methods.runCreationScript = function(){
  
 }
 
-sqlRivalSchema.methods.dropDatabase = function(){
+sqlRivalSchema.methods.dropDatabase =async  function(){
   try{
-    executeQuery({query: `DROP DATABASE ${this.databaseName}`, useExecute:true});
+   await  executeQuery({query: `DROP DATABASE ${this.databaseName}`, useExecute:true});
   } catch (error) {
     console.log("error dropping database", error.message);
   }

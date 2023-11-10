@@ -223,7 +223,7 @@ const submissionAlgorithm = async (req, res, rival) => {
 
 const submissionSQL = async (req, res, rival) => {
   const {userCode } = req.body;
-  if (userCode === undefined || userCode === null){
+  if (userCode === undefined || userCode === null || userCode === ""){
     return res.status(400).json({ message: "write some code" });
   }
   try {
@@ -259,6 +259,7 @@ const submissionSQL = async (req, res, rival) => {
     
    
   } catch (error){
+    executeQuery({query: `DROP DATABASE ${rival.databaseName}`, useExecute:true});
     
       console.log("entre a error")
       const newSubmission = await Submission.create(

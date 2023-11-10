@@ -43,8 +43,10 @@ export const publishSqlRival = async (req, res, next) => {
 
 export const patchSqlRivalDraft = async (req, res, next) => {
   try {
-    const foundRival = req.findRival;
-
+    const foundRival = await SqlRival.findOne({
+      _id: req.params.rivalId,
+      createdBy: req.user.id,
+    });
     const tags = await findTagsAndCreate(req.body.tags);
 
     if (foundRival.title) foundRival.title = req.body.title;
@@ -75,12 +77,15 @@ export const getSqlRivals = async (_req, res, next) => {
 
 export const dropSqlRival = async (req, res, next) => {
   try {
-    const foundRival = req.foundRival;
+    const foundRival = await SqlRival.findOne({
+      _id: req.params.rivalId,
+   
+    });
     await Submission.deleteMany({ rival: foundRival._id });
     await Grade.deleteMany({ rival: foundRival._id });
     await Discuss.deleteMany({ rival: foundRival._id });
     await req.foundRival.remove();
-    res.sendStatus(200);
+    res.sendStatus(202);
   } catch (error) {
     next(error);
   }

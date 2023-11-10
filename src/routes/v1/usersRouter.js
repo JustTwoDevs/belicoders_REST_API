@@ -8,5 +8,5 @@ const userRouter = Router();
 
 userRouter.post("/register", registerValidator, register);
 userRouter.get("/", getProfile);
-
 export default userRouter;
+
