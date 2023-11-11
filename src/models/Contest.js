@@ -25,21 +25,4 @@ const contestSchema = new Schema({
   createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
 });
 
-contestSchema.methods.calculateContestKind = function () {
-  let algorithmFlag = false;
-  let sqlFlag = false;
-  for (const rival of this.rivals) {
-    if (rival.__t === "AlgorithmRival") {
-      if (sqlFlag) break;
-      else algorithmFlag = true;
-    } else if (rival.__t === "SqlRival") {
-      if (algorithmFlag) break;
-      else sqlFlag = true;
-    }
-  }
-  if (algorithmFlag && sqlFlag) this.kind = "Miscellaneous";
-  if (algorithmFlag) this.kind = "Algorithm";
-  if (sqlFlag) this.kind = "SQL";
-};
-
 export default models.Contest || model("Contest", contestSchema);
