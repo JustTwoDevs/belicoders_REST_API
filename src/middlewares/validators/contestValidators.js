@@ -20,6 +20,7 @@ export const getContestByTitleValidator = validator(null, {
 });
 
 export const getUserContestValidator = validator(null, {
+  populate: "rivals",
   model: "Contest",
   validator: null,
 });
