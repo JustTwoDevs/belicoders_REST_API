@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 import { writeFileSync, unlinkSync } from "fs";
-import {executeQuery} from "#databaseConnections/mysqlConnection.js";
+import { executeQuery } from "#databaseConnections/mysqlConnection.js";
 
 export const runAlgorithmCode = async (req, res) => {
   const { inputCases, solutionCode, userCode } = req.body;
@@ -30,18 +30,18 @@ export const runAlgorithmCode = async (req, res) => {
     return res.status(200).json({ errorOutput });
   }
   try {
-    writeFileSync(`solutionCode.py`, solutionCode);
+    writeFileSync(`solutionCode${req.user.id}.py`, solutionCode);
     const outputSolution = execSync(
-      `python solutionCode.py < ${req.user.id}.txt`,
+      `python solutionCode${req.user.id}.py < ${req.user.id}.txt`,
       { timeout: 3000 }
     );
     const solutionOutput = outputSolution.toString();
-    unlinkSync(`solutionCode.py`);
+    unlinkSync(`solutionCode${req.user.id}.py`);
     unlinkSync(`${req.user.id}.txt`);
     return res.status(200).json({ userOutput, solutionOutput });
   } catch (err) {
     const errorInputCases = err.message;
-    unlinkSync(`solutionCode.py`);
+    unlinkSync(`solutionCode${req.user.id}.py`);
     unlinkSync(`${req.user.id}.txt`);
     return res.status(200).json({ errorInputCases });
   }
@@ -60,24 +60,23 @@ export const runSQLCode = async (req, res) => {
   try {
     await executeQuery({
       query: `CREATE DATABASE ${databaseName}`,
-      useExecute:true
+      useExecute: true,
     });
     await executeQuery({
       query: `USE ${databaseName};${creationScript}`,
-      useExecute:false
+      useExecute: false,
     });
 
-    const result =await executeQuery({
-      query: userCode, useExecute:false
-    })
-    
-    executeQuery({query: `DROP DATABASE ${databaseName}`, useExecute:true});
-   
-      return res.status(200).json({ result, message: "query run succesfully" });
-    
-  
+    const result = await executeQuery({
+      query: userCode,
+      useExecute: false,
+    });
+
+    executeQuery({ query: `DROP DATABASE ${databaseName}`, useExecute: true });
+
+    return res.status(200).json({ result, message: "query run succesfully" });
   } catch (err) {
-    executeQuery({query: `DROP DATABASE ${databaseName}`, useExecute:true});
+    executeQuery({ query: `DROP DATABASE ${databaseName}`, useExecute: true });
     return res.status(200).json({ errorOutput: err.message });
   }
 };
