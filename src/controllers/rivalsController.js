@@ -79,7 +79,7 @@ export const getUserRivals = async (req, res, next) => {
     const foundRivals = await Rival.find(query)
       .skip((parseInt(page) - 1) * rivalsPerPage || 0)
       .limit(rivalsPerPage)
-      .populate("tags")
+      .populate("tags", "createdBy")
       .sort({ "grades.value": parseInt(sort) || -1 });
 
     res.json(foundRivals);

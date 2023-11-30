@@ -12,7 +12,7 @@ const transporter = createTransport({
 const userSchema = new Schema({
   name: { type: String, required: [true, "Name is required"] },
   lastname: { type: String, required: [true, "Lastname is required"] },
-  birthDate: { type: Date, required: [true, "Birth Date is required"] },
+  birthDate: { type: String, required: [true, "Birth Date is required"] },
   nationality: { type: String, required: [true, "Nationality is required"] },
   genre: { type: String, required: [true, "Genre is required"] },
   username: {
