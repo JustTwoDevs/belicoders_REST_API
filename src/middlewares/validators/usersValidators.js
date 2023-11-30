@@ -23,4 +23,6 @@ const registerRequestValidator = async (body, errors) => {
   }
 };
 
+
+
 export const registerValidator = validator(registerRequestValidator, null);
