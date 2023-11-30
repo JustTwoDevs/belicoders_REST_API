@@ -10,6 +10,7 @@ export const createAlgorithmRivalDraft = async (req, res, next) => {
       statement: req.body.statement,
       solutionCode: req.body.solutionCode,
       inputCases: req.body.inputCases,
+      sampleInputCases: req.body.sampleInputCases,
       runtime: req.body.runtime,
       difficulty: req.body.difficulty,
       createdBy: req.user.id,

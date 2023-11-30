@@ -6,10 +6,10 @@ const { models, Schema } = pkg;
 
 const algorithmRivalSchema = new Schema({
   inputCases: { type: String },
+  sampleInputCases: { type: String },
 });
 
-
-algorithmRivalSchema.methods.generateExpectedOutput = function (user) {
+algorithmRivalSchema.methods.generateExpectedOutput = function(user) {
   if (this.solutionCode === undefined || this.inputCases === undefined) return;
   try {
     writeFileSync(`${user.id}.txt`, this.inputCases);
