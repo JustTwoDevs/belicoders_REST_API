@@ -5,6 +5,8 @@ import { execSync } from "child_process";
 import { writeFileSync, unlinkSync } from "fs";
 import Submission, { States as SubmissionStates } from "#models/Submission.js";
 import { executeQuery } from "#databaseConnections/mysqlConnection.js";
+import { testAlgorithmRival } from "./algorithmRivalsController.js";
+import { testSQLRival } from "./sqlRivalsController.js";
 
 export const getRivals = async (req, res, next) => {
   try {
@@ -164,6 +166,20 @@ export const submission = async (req, res, next) => {
   }
 };
 
+export const testRival = async (req, res, next) => {
+  try {
+    if (req.user.id !== req.rival.createdBy)
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to acces this endpoint" });
+    if (req.rival.__t === "AlgorithmRival")
+      testAlgorithmRival(req, res, req.rival);
+    else if (req.rival.__t === "SqlRival") testSQLRival(req, res, req.rival);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const submissionAlgorithm = async (req, res, rival) => {
   const { userCode } = req.body;
   if (userCode === undefined)
@@ -176,7 +192,7 @@ const submissionAlgorithm = async (req, res, rival) => {
     writeFileSync(`${req.user.id}.py`, userCode);
     const outputUser = execSync(
       `python ${req.user.id}.py < ${req.user.id}.txt`,
-      { timeout: runTime }
+      { timeout: runTime },
     );
     const userOutput = outputUser.toString();
     unlinkSync(`${req.user.id}.txt`);
@@ -293,7 +309,7 @@ export const getSubmissions = async (req, res, next) => {
   if (!rival) return res.sendStatus(404);
 
   const submissions = rival.submissions.filter(
-    (submission) => submission.userId.toString() === req.user.id
+    (submission) => submission.userId.toString() === req.user.id,
   );
 
   if (submissions.length === 0) return res.sendStatus(404);
@@ -308,7 +324,7 @@ export const getLastSubmission = async (req, res, next) => {
   if (!rival) return res.sendStatus(404);
 
   const submissions = rival.submissions.filter(
-    (submission) => submission.userId.toString() === req.user.id
+    (submission) => submission.userId.toString() === req.user.id,
   );
 
   submissions.sort((a, b) => {

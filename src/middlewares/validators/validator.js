@@ -25,7 +25,9 @@ export default function validator(
           // walk through the querys and add them to the query object, if the querys have a value, use it, if not, use the param from the request
           for (const incomingQuery of documentValidator.querys) {
             query[incomingQuery.field] = incomingQuery.value
-              ? incomingQuery.value
+              ? incomingQuery.value === "userId"
+                ? req.user.id
+                : incomingQuery.value
               : req.params[incomingQuery.param];
           }
         } else {
