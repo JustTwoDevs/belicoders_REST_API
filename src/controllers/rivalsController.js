@@ -181,8 +181,6 @@ const submissionAlgorithm = async (req, res, rival) => {
     const userOutput = outputUser.toString();
     unlinkSync(`${req.user.id}.txt`);
     unlinkSync(`${req.user.id}.py`);
-    // Imprimir los outputs. Incluyendo caracteres especiales como \n
-    console.log(userOutput.toString() === solutionOutput);
 
     const newSubmission = await Submission.create({
       code: userCode,
@@ -295,6 +293,12 @@ export const getSubmissions = async (req, res, next) => {
   const submissions = rival.submissions.filter(
     (submission) => submission.userId.toString() === req.user.id
   );
+
+  submissions.sort((a, b) => {
+    if (a.createdAt < b.createdAt) return 1;
+    if (a.createdAt > b.createdAt) return -1;
+    return 0;
+  });
 
   if (submissions.length === 0) return res.sendStatus(404);
   res.json(submissions);

@@ -67,14 +67,14 @@ export const runSQLCode = async (req, res) => {
       useExecute: false,
     });
 
-    const result = await executeQuery({
+    const userOutput = await executeQuery({
       query: userCode,
       useExecute: false,
     });
 
     executeQuery({ query: `DROP DATABASE ${databaseName}`, useExecute: true });
 
-    return res.status(200).json({ result, message: "query run succesfully" });
+    return res.status(200).json({ userOutput });
   } catch (err) {
     executeQuery({ query: `DROP DATABASE ${databaseName}`, useExecute: true });
     return res.status(200).json({ errorOutput: err.message });
