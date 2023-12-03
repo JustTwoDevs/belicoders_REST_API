@@ -48,6 +48,20 @@ export const getProfileById = async (req, res, next) => {
   }
 };
 
+export const getProfileByUsername = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ username: req.params.username });
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const patchProfile = async (req, res, next) => {
   try {
     const userPatch = await User.findById(req.user.id);
@@ -71,25 +85,43 @@ export const patchProfile = async (req, res, next) => {
 
 export const getRivals = async (req, res, next) => {
   try {
-    const rivals = await Rival.find({ createdBy: req.params.userId,
-      state: States.PUBLISHED
-     });
+    const user = await User.findOne({ username: req.params.username });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const rivals = await Rival.find({
+      createdBy: user._id,
+      state: States.PUBLISHED,
+    });
 
     res.json(rivals);
   } catch (error) {
     next(error);
   }
-}
+};
+
 
 export const getContests = async (req, res, next) => {
   try {
-    const contests = await Contest.find({ createdBy: req.params.userId,
-      state: States.PUBLISHED });
+    const user = await User.findOne({ username: req.params.username });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const contests = await Contest.find({
+      createdBy: user._id,
+      state: States.PUBLISHED,
+    });
+
     res.json(contests);
   } catch (error) {
     next(error);
   }
 };
+
 export const changePassword = async (req, res, next) => {
   try {
     const { oldPassword, newPassword } = req.body;
