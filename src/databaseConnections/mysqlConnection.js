@@ -11,13 +11,24 @@ const mysqlConnection = mysql.createPool({
 
 export const  executeQuery= (options)=> {
   return new Promise((resolve, reject) => {
+    const { query, useExecute, validation } = options;
+    if (validation) {
+      // validate query
+      if (isUnsafeQuery(query)) {
+        const error = new Error("You can just execute SELECT queries");
+        reject(error);
+        return;
+      }
+    }
+
     mysqlConnection.getConnection((err, connection) => {
       if (err) {
         reject(err);
         return;
       }
-
-      const { query, useExecute } = options;
+      console.log("Connected to the mysql database :)!");
+     
+      
 
       if (useExecute) {
         connection.execute(query, (queryErr, results) => {
@@ -42,6 +53,13 @@ export const  executeQuery= (options)=> {
       }
     });
   });
+}
+
+function isUnsafeQuery(query) {
+
+  const unsafeKeywords = ["INSERT", "DELETE", "CREATE", "DROP", "ALTER"];
+  const normalizedQuery = query.toUpperCase();
+  return unsafeKeywords.some(keyword => normalizedQuery.includes(keyword));
 }
 
 
