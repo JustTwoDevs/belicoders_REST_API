@@ -62,28 +62,14 @@ export const getRivalByTitle = async (req, res, next) => {
 
 export const getUserRivals = async (req, res, next) => {
   try {
-    const { tags, search, sort, difficulty, page } = req.query;
-    const query = { createdBy: req.user.id };
-    const rivalsPerPage = 10;
-    if (difficulty) query.difficulty = parseInt(difficulty);
-    if (search) {
-      query.$or = [
-        { title: { $regex: req.query.search, $options: "i" } },
-        { statement: { $regex: req.query.search, $options: "i" } },
-      ];
-    }
+    const { tags } = req.query;
+    const query = {};
     if (tags) {
       const foundTags = await Tag.find({ name: { $in: tags.split(",") } });
       if (foundTags.length)
         query.tags = { $in: foundTags.map((tag) => tag._id) };
     }
-
-    const foundRivals = await Rival.find(query)
-      .skip((parseInt(page) - 1) * rivalsPerPage || 0)
-      .limit(rivalsPerPage)
-      .populate("tags", "createdBy")
-      .sort({ "grades.value": parseInt(sort) || -1 });
-
+    const foundRivals = await Rival.find(query).populate("createdBy");
     res.json(foundRivals);
   } catch (error) {
     next(error);
@@ -95,6 +81,7 @@ export const getUserRivalById = async (req, res, next) => {
     const foundRival = await Rival.findOne({
       _id: req.params.rivalId,
       createdBy: req.user.id,
+      state: States.DRAFT,
     });
     if (foundRival != null) res.json(foundRival);
     else res.sendStatus(404);

@@ -55,7 +55,7 @@ export default function validator(
 async function validateRequest(res, body, validate, errors) {
   await validate(body, errors);
   if (errors.length > 0) {
-    res.status(422).json(errors);
+    res.status(422).json({ errors });
     return false;
   }
 }
@@ -71,7 +71,7 @@ async function validateDocument(res, model, query, populate, validate, errors) {
   }
   if (validate) await validate(document, errors);
   if (errors.length > 0) {
-    res.status(400).json(errors);
+    res.status(400).json({ errors });
     return false;
   }
   return document;

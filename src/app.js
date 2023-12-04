@@ -22,18 +22,20 @@ app.use(cookieParser());
 app.use("/api/v1", mainRouterV1);
 // Error handling middleware
 app.use(function (err, req, res, next) {
+  const errors = [];
   if (err.name === "ValidationError") {
-    res.status(400).json({ error: err.message });
+    errors.push({ on: "ValidationErrors", message: err.message });
   }
   if (err.name === "CastError") {
-    res.status(400).json({ error: err.message });
+    errors.push({ on: "CastErrors", message: err.message });
   }
   if (
     err.name === "MongoServerError" &&
     err.message.includes("duplicate key")
   ) {
-    res.status(400).json({ error: err.message });
+    errors.push({ on: "MongoServerErrors", message: err.message });
   }
+  if (errors.length > 0) res.status(422).json({ errors });
   next(err);
 });
 
