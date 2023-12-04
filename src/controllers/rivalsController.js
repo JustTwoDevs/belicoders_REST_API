@@ -82,7 +82,7 @@ export const getUserRivalById = async (req, res, next) => {
       _id: req.params.rivalId,
       createdBy: req.user.id,
       state: States.DRAFT,
-    });
+    }).populate("tags");
     if (foundRival != null) res.json(foundRival);
     else res.sendStatus(404);
   } catch (error) {
