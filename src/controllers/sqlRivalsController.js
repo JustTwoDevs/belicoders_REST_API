@@ -4,7 +4,7 @@ import Submission from "#models/Submission.js";
 import Discuss from "#models/Discuss.js";
 import Grade from "#models/Grade.js";
 import { findTagsAndCreate } from "./rivalsController.js";
-
+import { executeQuery } from "#databaseConnections/mysqlConnection.js";
 
 
 export const createSqlRivalDraft = async (req, res, next) => {
@@ -35,7 +35,7 @@ export const publishSqlRival = async (req, res, next) => {
     const foundRival = req.foundRival;
     foundRival.state = States.PUBLISHED;
 
-    await req.foundRival.save().json({foundRival});
+    await req.foundRival.save().json({ foundRival });
     res.sendStatus(200);
   } catch (error) {
     next(error);
@@ -81,7 +81,6 @@ export const dropSqlRival = async (req, res, next) => {
   try {
     const foundRival = await SqlRival.findOne({
       _id: req.params.rivalId,
-   
     });
     await Submission.deleteMany({ rival: foundRival._id });
     await Grade.deleteMany({ rival: foundRival._id });
@@ -93,5 +92,39 @@ export const dropSqlRival = async (req, res, next) => {
   }
 };
 
+export const testSQLRival = async (req, res, rival) => {
+  const { userCode } = req.body;
+  const { expectedOutput, databaseName, creationScript } = rival;
+  try {
+    await executeQuery({
+      query: `CREATE DATABASE ${databaseName}`,
+      useExecute: true,
+    });
+    await executeQuery({
+      query: `USE ${databaseName};${creationScript}`,
+      useExecute: false,
+    });
 
-
+    const userOutput = await executeQuery({
+      query: userCode,
+      useExecute: false,
+    });
+    if (JSON.stringify(userOutput) !== expectedOutput) {
+      return res
+        .status(200)
+        .json({ state: "WRONG_ANSWER", userOutput, expectedOutput });
+    }
+    return res
+      .status(200)
+      .json({ state: "ACCEPTED", userOutput, expectedOutput });
+  } catch (error) {
+    return res
+      .status(200)
+      .json({ state: "COMPILATION_ERROR", output: error.message });
+  } finally {
+    executeQuery({
+      query: `DROP DATABASE ${rival.databaseName}`,
+      useExecute: true,
+    });
+  }
+};

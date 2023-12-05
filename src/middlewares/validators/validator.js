@@ -25,7 +25,9 @@ export default function validator(
           // walk through the querys and add them to the query object, if the querys have a value, use it, if not, use the param from the request
           for (const incomingQuery of documentValidator.querys) {
             query[incomingQuery.field] = incomingQuery.value
-              ? incomingQuery.value
+              ? incomingQuery.value === "userId"
+                ? req.user.id
+                : incomingQuery.value
               : req.params[incomingQuery.param];
           }
         } else {
@@ -53,7 +55,7 @@ export default function validator(
 async function validateRequest(res, body, validate, errors) {
   await validate(body, errors);
   if (errors.length > 0) {
-    res.status(422).json(errors);
+    res.status(422).json({ errors });
     return false;
   }
 }
@@ -69,7 +71,7 @@ async function validateDocument(res, model, query, populate, validate, errors) {
   }
   if (validate) await validate(document, errors);
   if (errors.length > 0) {
-    res.status(400).json(errors);
+    res.status(400).json({ errors });
     return false;
   }
   return document;

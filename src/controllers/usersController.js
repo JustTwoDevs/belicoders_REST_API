@@ -1,5 +1,5 @@
 import User from "#models/User.js";
-import Rival ,{ States } from "#models/Rival.js";
+import Rival, { States } from "#models/Rival.js";
 import Contest from "#models/Contest.js";
 
 export const register = async (req, res, next) => {
@@ -28,7 +28,6 @@ export const register = async (req, res, next) => {
 
 export const getProfile = async (req, res, next) => {
   try {
-  
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     res.status(200).json(user);
@@ -75,13 +74,12 @@ export const patchProfile = async (req, res, next) => {
     if (userPatch.email) userPatch.email = req.body.email;
     if (userPatch.number) userPatch.number = req.body.number;
     await userPatch.save();
-   
+
     res.status(200).json({ message: "User updated", userPatch });
   } catch (error) {
     next(error);
   }
 };
-
 
 export const getRivals = async (req, res, next) => {
   try {
@@ -102,7 +100,6 @@ export const getRivals = async (req, res, next) => {
   }
 };
 
-
 export const getContests = async (req, res, next) => {
   try {
     const user = await User.findOne({ username: req.params.username });
@@ -115,7 +112,6 @@ export const getContests = async (req, res, next) => {
       createdBy: user._id,
       state: States.PUBLISHED,
     });
-
     res.json(contests);
   } catch (error) {
     next(error);
@@ -156,7 +152,4 @@ export const changePassword = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-
-  
-
 };

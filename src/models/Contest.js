@@ -22,6 +22,7 @@ const contestSchema = new Schema({
   description: { type: String, trim: true },
   state: { type: String, enum: Object.values(States), default: States.DRAFT },
   rivals: [{ type: Schema.Types.ObjectId, ref: "Rival" }],
+  tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
   createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
 });
 

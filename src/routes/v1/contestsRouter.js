@@ -3,15 +3,10 @@ import {
   getContests,
   getContestByTitle,
 } from "#controllers/contestsController.js";
-import { getContestByTitleValidator } from "#middlewares/validators/contestValidators.js";
 
 const contestsRouter = Router();
 
 contestsRouter.get("/", getContests);
-contestsRouter.get(
-  "/:contestTitle",
-  getContestByTitleValidator,
-  getContestByTitle,
-);
+contestsRouter.get("/:contestTitle", getContestByTitle);
 
 export default contestsRouter;
