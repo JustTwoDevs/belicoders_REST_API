@@ -52,9 +52,15 @@ export const getContests = async (req, res, next) => {
 // Should we LowerCase the title?
 export const getContestByTitle = async (req, res, next) => {
   try {
-    req.contest = await req.contest.populate("rivals");
-    req.contest = await req.contest.populate("tags", "name");
-    res.status(200).json(req.contest);
+    const title = req.params.contestTitle.replace(/-/g, " ");
+    const foundContest = await Contest.findOne({
+      title,
+      state: States.PUBLISHED,
+    })
+      .populate("rivals")
+      .populate("tags", "name");
+    if (foundContest === null) return res.sendStatus(404);
+    return res.status(200).json(foundContest);
   } catch (error) {
     next(error);
   }
@@ -69,7 +75,6 @@ export const getUserContests = async (req, res, next) => {
       if (foundTags.length)
         query.tags = { $in: foundTags.map((tag) => tag._id) };
     }
-    query.state = States.PUBLISHED;
     query.createdBy = req.user.id;
     const contests = await Contest.find(query)
       .populate("createdBy", "name")
@@ -82,10 +87,13 @@ export const getUserContests = async (req, res, next) => {
 
 export const getUserContest = async (req, res, next) => {
   try {
-    req.contest = await req.contest.populate("rivals");
-    req.contest = await req.contest.populate("tags", "name");
-    req.contest.tags = calculateContestTags(req.contest);
-    res.status(200).json(req.contest);
+    const foundContest = await Contest.findOne({
+      _id: req.params.contestId,
+      createdBy: req.user.id,
+      state: States.DRAFT,
+    }).populate("rivals");
+    if (foundContest === null) return res.sendStatus(404);
+    return res.status(200).json(foundContest);
   } catch (error) {
     next(error);
   }
@@ -103,7 +111,7 @@ export const createContestDraft = async (req, res, next) => {
     contest.kind = await calculateContestKind(contest.rivals);
     contest.tags = await calculateContestTags(contest.rivals);
     await contest.save();
-    res.status(201).json(contest);
+    res.status(201).json({ newContest: contest });
   } catch (error) {
     next(error);
   }
@@ -125,10 +133,9 @@ export const patchContestDraft = async (req, res, next) => {
 
 export const publishContest = async (req, res, next) => {
   try {
-    req.contest.calculateContestKind();
     req.contest.state = States.PUBLISHED;
-    const savedContest = await req.contest.save();
-    res.status(200).json(savedContest);
+    await req.contest.save();
+    res.status(200).json({ message: "Contest published succesfully" });
   } catch (error) {
     next(error);
   }

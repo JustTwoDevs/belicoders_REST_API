@@ -54,7 +54,8 @@ export const getRivalByTitle = async (req, res, next) => {
         },
       })
       .exec();
-    if (foundRival != null) res.json(foundRival);
+    if (foundRival === null) return res.sendStatus(404);
+    return res.status(200).json(foundRival);
   } catch (error) {
     next(error);
   }
