@@ -61,22 +61,26 @@ export const runSQLCode = async (req, res) => {
     await executeQuery({
       query: `CREATE DATABASE ${databaseName}`,
       useExecute: true,
+      validation:false
     });
     await executeQuery({
       query: `USE ${databaseName};${creationScript}`,
       useExecute: false,
+      validation: false
     });
 
-    const result = await executeQuery({
+
+    const userOutput = await executeQuery({
       query: userCode,
       useExecute: false,
+      validation: true
     });
 
-    executeQuery({ query: `DROP DATABASE ${databaseName}`, useExecute: true });
+    executeQuery({ query: `DROP DATABASE ${databaseName}`, useExecute: true, validation: false });
 
-    return res.status(200).json({ result, message: "query run succesfully" });
+    return res.status(200).json({ userOutput });
   } catch (err) {
-    executeQuery({ query: `DROP DATABASE ${databaseName}`, useExecute: true });
-    return res.status(200).json({ errorOutput: err.message });
+   try{ executeQuery({ query: `DROP DATABASE ${databaseName}`, useExecute: true, validation:false });} catch(err){return res.status(200).json({ errorOutput: err.message });}
+    return res.status(200).json({ errorMessage: err.message });
   }
 };

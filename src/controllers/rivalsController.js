@@ -185,8 +185,6 @@ const submissionAlgorithm = async (req, res, rival) => {
     const userOutput = outputUser.toString();
     unlinkSync(`${req.user.id}.txt`);
     unlinkSync(`${req.user.id}.py`);
-    // Imprimir los outputs. Incluyendo caracteres especiales como \n
-    console.log(userOutput.toString() === solutionOutput);
 
     const newSubmission = await Submission.create({
       code: userCode,
@@ -235,22 +233,44 @@ const submissionSQL = async (req, res, rival) => {
   }
   try {
     const expectedOutput = rival.expectedOutput;
+    const timeLimit = rival.runTime;
     await executeQuery({
       query: `CREATE DATABASE ${rival.databaseName}`,
       useExecute: true,
+      validation: false,
     });
     await executeQuery({
       query: `USE ${rival.databaseName};${rival.creationScript}`,
       useExecute: false,
+      validation: false,
     });
-    const result = await executeQuery({
-      query: userCode,
-      useExecute: false,
-    });
+
+    
+    const userExecution = async () => {
+      try {
+        const userOutput = await executeQuery({
+          query: userCode,
+          useExecute: false,
+          validation: true,
+        });
+        return { userOutput };
+      } catch (err) {
+        throw new Error(err.message);
+      }
+    };
+    const result = await Promise.race([
+      userExecution(),
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          reject(new Error("Execution time exceeded"));
+        }, timeLimit);
+      }),
+    ]);
 
     executeQuery({
       query: `DROP DATABASE ${rival.databaseName}`,
       useExecute: true,
+      validation: false,
     });
     const isCorrect = JSON.stringify(result) === expectedOutput;
 
@@ -267,17 +287,30 @@ const submissionSQL = async (req, res, rival) => {
     await newSubmission.save();
     return res.status(200).json({ ...newSubmission._doc, submission: true });
   } catch (error) {
-    executeQuery({
-      query: `DROP DATABASE ${rival.databaseName}`,
-      useExecute: true,
-    });
+    try {
+      executeQuery({
+        query: `DROP DATABASE ${rival.databaseName}`,
+        useExecute: true,
+        validation: false,
+      });
+    } catch (err) {res.status(200).json({ errorOutput: err.message });}
+
+    const errorOutput = error.message;
+    let submissionState;
 
     console.log("entre a error");
+
+    if (errorOutput.includes("Execution time exceeded")) {
+      submissionState = SubmissionStates.RUNTIME_ERROR;
+    } else {
+      submissionState = SubmissionStates.COMPILATION_ERROR;
+    }
+
     const newSubmission = await Submission.create({
       userId: req.user.id,
       code: userCode,
       output: error.message,
-      state: SubmissionStates.COMPILATION_ERROR,
+      state: submissionState,
     });
 
     rival.submissions.push(newSubmission._id);
@@ -299,6 +332,12 @@ export const getSubmissions = async (req, res, next) => {
   const submissions = rival.submissions.filter(
     (submission) => submission.userId.toString() === req.user.id,
   );
+
+  submissions.sort((a, b) => {
+    if (a.createdAt < b.createdAt) return 1;
+    if (a.createdAt > b.createdAt) return -1;
+    return 0;
+  });
 
   if (submissions.length === 0) return res.sendStatus(404);
   res.json(submissions);

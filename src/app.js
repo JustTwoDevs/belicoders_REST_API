@@ -3,6 +3,7 @@ import morgan from "morgan";
 import cors from "cors";
 import mainRouterV1 from "./routes/v1/mainRouterV1.js";
 import cookieParser from "cookie-parser";
+import "dotenv/config.js";
 const app = express();
 
 // Middlewares
@@ -11,8 +12,8 @@ app.use(morgan("dev"));
 app.use(
   cors({
     credentials: true,
-    origin: "http://localhost:8000",
-  }),
+    origin: process.env.CLIENT_URL,
+  })
 );
 
 app.use(json());
