@@ -35,26 +35,25 @@ export const publishAlgorithmRival = async (req, res, next) => {
       _id: req.params.rivalId,
       createdBy: req.user.id,
     });
-    if (foundRival === null) return res.sendStatus(404);
+    if (foundRival === null)
+      return res.status(404).json({ message: "Not found" });
     if (foundRival.state === States.PUBLISHED)
       return res
         .status(409)
-        .json({ message: "The problem is already published" });
+        .json({ message: "The rival is already published" });
     if (!foundRival.solutionCode)
       return res
         .status(400)
-        .json({ message: "The problem has no solution code" });
+        .json({ message: "The rival has no solution code" });
     if (!foundRival.inputCases)
-      return res
-        .status(400)
-        .json({ message: "The problem has no input cases" });
+      return res.status(400).json({ message: "The rival has no input cases" });
     if (!foundRival.expectedOutput)
       return res
         .status(400)
-        .json({ message: "The problem has no expected output" });
+        .json({ message: "The rival has no expected output" });
     foundRival.state = States.PUBLISHED;
     await foundRival.save();
-    res.sendStatus(200);
+    res.status(200).json({ message: "The rival was published successfully" });
   } catch (error) {
     next(error);
   }
@@ -68,12 +67,14 @@ export const patchAlgorithmRivalDraft = async (req, res, next) => {
     });
     if (foundRival == null) return res.sendStatus(404);
     if (foundRival.state !== States.DRAFT)
-      return res.status(409).json({ message: "The problem is not a draft" });
+      return res.status(409).json({ message: "The rival is not a draft" });
 
     if (req.body.title) foundRival.title = req.body.title;
     if (req.body.solutionMd) foundRival.solutionMd = req.body.solutionMd;
     if (req.body.statement) foundRival.statement = req.body.statement;
     if (req.body.solutionCode) foundRival.solutionCode = req.body.solutionCode;
+    if (req.body.sampleInputCases)
+      foundRival.sampleInputCases = req.body.sampleInputCases;
     if (req.body.inputCases) foundRival.inputCases = req.body.inputCases;
     if (req.body.runtime) foundRival.runtime = req.body.runtime;
     if (req.body.difficulty) foundRival.difficulty = req.body.difficulty;

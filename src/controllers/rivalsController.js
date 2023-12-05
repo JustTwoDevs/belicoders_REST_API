@@ -131,9 +131,9 @@ export const deleteRivalDraft = async (req, res, next) => {
     });
     if (foundRival === null) return res.sendStatus(404);
     if (foundRival.state !== States.DRAFT)
-      return res.status(409).json({ message: "The problem is not a draft" });
-    await foundRival.delete();
-    res.sendStatus(200);
+      return res.status(409).json({ message: "The rival is not a draft" });
+    await foundRival.deleteOne();
+    res.status(200).json({ message: "Rival was deleted succesfully" });
   } catch (error) {
     next(error);
   }
