@@ -122,6 +122,22 @@ export const getContests = async (req, res, next) => {
   }
 };
 
+export const getMyGrade = async (req, res, next) => {
+  try {
+    const rival = await Rival.findById(req.params.rivalId).populate("grades");
+   
+    const grade = rival.grades.find((grade) => grade.userId.toString() === req.user.id.toString());
+
+    if (!grade) return res.status(404).json({ message: "Grade not found" });
+
+    return res.status(200).json({  grade });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+
 export const changePassword = async (req, res, next) => {
   try {
     const { oldPassword, newPassword } = req.body;

@@ -4,6 +4,7 @@ import userAlgorithmRivalsRouter from "./userAlgorithmRivalsRouter.js";
 import userSqlRivalRouter from "./userSqlRivalsRouter.js";
 import userContestsRouter from "./userContestsRouter.js";
 import userProfileRouter from "./userProfileRouter.js";
+import { getMyGrade } from "#controllers/usersController.js";
 
 const userResourcesRouter = Router();
 
@@ -12,5 +13,7 @@ userResourcesRouter.use("/myAlgorithmRivals", userAlgorithmRivalsRouter);
 userResourcesRouter.use("/mySqlRivals", userSqlRivalRouter);
 userResourcesRouter.use("/myContests", userContestsRouter);
 userResourcesRouter.use("/myProfile", userProfileRouter);
+// opcional 
+userResourcesRouter.get("/rivals/:rivalId/myGrade", getMyGrade);
 
 export default userResourcesRouter;

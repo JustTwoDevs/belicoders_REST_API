@@ -36,19 +36,19 @@ export const publishAlgorithmRival = async (req, res, next) => {
     if (foundRival.state === States.PUBLISHED)
       return res
         .status(409)
-        .json({ message: "The problem is already published" });
+        .json({ message: "The rival is already published" });
     if (!foundRival.solutionCode)
       return res
         .status(400)
-        .json({ message: "The problem has no solution code" });
+        .json({ message: "The rival has no solution code" });
     if (!foundRival.inputCases)
       return res
         .status(400)
-        .json({ message: "The problem has no input cases" });
+        .json({ message: "The rival has no input cases" });
     if (!foundRival.expectedOutput)
       return res
         .status(400)
-        .json({ message: "The problem has no expected output" });
+        .json({ message: "The rival has no expected output" });
     foundRival.state = States.PUBLISHED;
     await foundRival.save();
     res.sendStatus(200);
@@ -74,6 +74,8 @@ export const patchAlgorithmRivalDraft = async (req, res, next) => {
     if (req.body.inputCases) foundRival.inputCases = req.body.inputCases;
     if (req.body.runtime) foundRival.runtime = req.body.runtime;
     if (req.body.difficulty) foundRival.difficulty = req.body.difficulty;
+   
+   
     foundRival.tags = await findTagsAndCreate(req.body.tags);
     foundRival.generateExpectedOutput();
     await foundRival.save();

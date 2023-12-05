@@ -6,6 +6,7 @@ import Grade from "#models/Grade.js";
 import { findTagsAndCreate } from "./rivalsController.js";
 
 
+
 export const createSqlRivalDraft = async (req, res, next) => {
   try {
     const problemData = {
@@ -58,6 +59,7 @@ export const patchSqlRivalDraft = async (req, res, next) => {
       foundRival.creationScript = req.body.creationScript;
     if (foundRival.solutionCode)
       foundRival.solutionCode = req.body.solutionCode;
+      
 
     await foundRival.save();
     res.status(200).json({ foundRival });
