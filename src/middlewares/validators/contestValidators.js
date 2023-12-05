@@ -2,29 +2,6 @@ import validator from "./validator.js";
 import Rival, { States } from "#models/Rival.js";
 import { isValidObjectId } from "mongoose";
 
-export const getContestByTitleValidator = validator(null, {
-  model: "Contest",
-  // the fields to find the document (note that in this case is needed beacuse the document can't be get with the param contestId)
-  querys: [
-    { field: "title", param: "contestTitle" },
-    { field: "state", value: States.PUBLISHED },
-  ],
-  validator: async (contest, errors) => {
-    if (contest.state !== States.PUBLISHED) {
-      errors.push({
-        on: "state",
-        message: "The contest is not published",
-      });
-    }
-  },
-});
-
-export const getUserContestValidator = validator(null, {
-  populate: "rivals",
-  model: "Contest",
-  validator: null,
-});
-
 const contestRequestValidator = async (body, errors) => {
   if (body.state) {
     errors.push({
