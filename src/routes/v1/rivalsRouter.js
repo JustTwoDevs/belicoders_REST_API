@@ -6,6 +6,7 @@ import {
   submission,
   getSubmissions,
   getLastSubmission,
+  addGrade
 } from "#controllers/rivalsController.js";
 import authMiddleware from "#middlewares/authorization/authMiddleware.js";
 
@@ -17,5 +18,6 @@ rivalsRouter.post("/:rivalTitle/discuss", authMiddleware, createDiscuss);
 rivalsRouter.post("/:rivalTitle/submission", authMiddleware, submission);
 rivalsRouter.get("/:rivalId/submission", authMiddleware, getSubmissions);
 rivalsRouter.get("/:rivalId/lastSubmission", authMiddleware, getLastSubmission);
+rivalsRouter.post("/:rivalId/grade", authMiddleware, addGrade);
 
 export default rivalsRouter;

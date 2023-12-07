@@ -78,6 +78,8 @@ export const patchAlgorithmRivalDraft = async (req, res, next) => {
     if (req.body.inputCases) foundRival.inputCases = req.body.inputCases;
     if (req.body.runtime) foundRival.runtime = req.body.runtime;
     if (req.body.difficulty) foundRival.difficulty = req.body.difficulty;
+   
+   
     foundRival.tags = await findTagsAndCreate(req.body.tags);
     foundRival.generateExpectedOutput(req.user);
     await foundRival.save();

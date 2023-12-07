@@ -76,4 +76,13 @@ const rivalSchema = new Schema(
   },
 );
 
+rivalSchema.pre("save",  function () {
+  if (this.grades && this.grades.length > 0) {
+    const totalGrade = this.grades.reduce((sum, grade) => sum + grade.value, 0);
+    this.avgGrade = totalGrade / this.grades.length;
+  } else {
+    this.avgGrade = 0;
+  }
+});
+
 export default models.Rival || model("Rival", rivalSchema);

@@ -5,6 +5,7 @@ import { execSync } from "child_process";
 import { writeFileSync, unlinkSync } from "fs";
 import Submission, { States as SubmissionStates } from "#models/Submission.js";
 import { executeQuery } from "#databaseConnections/mysqlConnection.js";
+import Grade from "#models/Grade.js";
 import { testAlgorithmRival } from "./algorithmRivalsController.js";
 import { testSQLRival } from "./sqlRivalsController.js";
 
@@ -103,6 +104,32 @@ export const findTagsAndCreate = async (tags) => {
     }
   }
   return foundTags.map((tag) => tag._id);
+};
+
+export const addGrade = async (req, res, next) => {
+  try {
+    const foundRival = await Rival.findOne({ _id: req.params.rivalId }).populate("grades");
+   
+    const existingGrade = foundRival.grades.find((grade) => grade.userId.toString() === req.user.id.toString());
+
+    if (existingGrade) {
+      
+      existingGrade.value = req.body.grade;
+      await existingGrade.save();
+    } else if (!existingGrade) {
+
+      const newGrade = await Grade.create({
+        userId: req.user.id,
+        value: req.body.grade,
+      });
+      foundRival.grades.push(newGrade._id);
+      await foundRival.save();
+    }
+    res.status(200).json({ message: "Grade added" });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
 };
 
 export const createDiscuss = async (req, res, next) => {
@@ -245,7 +272,6 @@ const submissionSQL = async (req, res, rival) => {
       validation: false,
     });
 
-    
     const userExecution = async () => {
       try {
         const userOutput = await executeQuery({
@@ -293,7 +319,9 @@ const submissionSQL = async (req, res, rival) => {
         useExecute: true,
         validation: false,
       });
-    } catch (err) {res.status(200).json({ errorOutput: err.message });}
+    } catch (err) {
+      res.status(200).json({ errorOutput: err.message });
+    }
 
     const errorOutput = error.message;
     let submissionState;
@@ -363,3 +391,5 @@ export const getLastSubmission = async (req, res, next) => {
   if (submissions.length === 0) return res.sendStatus(404);
   res.json(submissions[0]);
 };
+
+
