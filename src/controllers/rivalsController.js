@@ -260,7 +260,7 @@ const submissionSQL = async (req, res, rival) => {
   }
   try {
     const expectedOutput = rival.expectedOutput;
-    const timeLimit = rival.runTime;
+    const timeLimit = rival.runtime;
     await executeQuery({
       query: `CREATE DATABASE ${rival.databaseName}`,
       useExecute: true,
@@ -298,7 +298,7 @@ const submissionSQL = async (req, res, rival) => {
       useExecute: true,
       validation: false,
     });
-    const isCorrect = JSON.stringify(result) === expectedOutput;
+    const isCorrect = JSON.stringify(result.userOutput) === expectedOutput;
 
     const newSubmission = await Submission.create({
       userId: req.user.id,

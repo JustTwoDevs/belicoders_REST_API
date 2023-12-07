@@ -12,7 +12,7 @@ sqlRivalSchema.methods.generateExpectedOutput =async function () {
   if (this.solutionCode === "" )
     this.expectedOutput = "";
   try {
-    await  executeQuery({query: `USE ${this.databaseName}`, useExecute:false});
+   
        const result = await  executeQuery({
             query: this.solutionCode, useExecute:false
           });
@@ -28,7 +28,9 @@ sqlRivalSchema.methods.runCreationScript = async function(){
   try {
     if (this.creationScript === "" || this.databaseName === "") return;
    
-  await executeQuery({query: `CREATE DATABASE ${this.databaseName}`, useExecute:true});
+  await executeQuery({query: `CREATE DATABASE ${this.databaseName};`, useExecute:true});
+  await executeQuery({query: `USE ${this.databaseName};`, useExecute:false});
+  await executeQuery({query: this.creationScript, useExecute:false});
  
   
   } catch (error) {
@@ -60,7 +62,7 @@ await this.dropDatabase();
 next();
   } 
  catch(error){
-  throw new Error('Error executing previous functions to save: ' + error.message);
+  console.log('error running the creation script')
  }
 
 });
