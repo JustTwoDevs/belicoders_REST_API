@@ -1,5 +1,6 @@
-import { States } from "../models/Rival.js";
-import SqlRival from "../models/SqlRival.js";
+
+import { States } from "#models/Rival.js";
+import SqlRival from "#models/SqlRival.js";
 import Submission from "#models/Submission.js";
 import Discuss from "#models/Discuss.js";
 import Grade from "#models/Grade.js";
@@ -30,13 +31,19 @@ export const createSqlRivalDraft = async (req, res, next) => {
   }
 };
 
+
 export const publishSqlRival = async (req, res, next) => {
   try {
-    const foundRival = req.foundRival;
-    foundRival.state = States.PUBLISHED;
+    const foundRival = await SqlRival.findById(req.params.rivalId);
 
-    await req.foundRival.save().json({ foundRival });
-    res.sendStatus(200);
+    if (!foundRival) {
+      return res.status(404).json({ error: 'Rival not found' });
+    }
+
+    foundRival.state = States.PUBLISHED;
+    await foundRival.save();
+
+    return res.status(200).json({message: 'Rival published successfully'});
   } catch (error) {
     next(error);
   }

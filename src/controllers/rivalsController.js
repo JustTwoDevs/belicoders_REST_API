@@ -6,7 +6,8 @@ import { writeFileSync, unlinkSync } from "fs";
 import Submission, { States as SubmissionStates } from "#models/Submission.js";
 import { executeQuery } from "#databaseConnections/mysqlConnection.js";
 import Grade from "#models/Grade.js";
-import { testAlgorithmRival, testSQLRival } from "#utils/testRival.js";
+import { testAlgorithmRival } from "./algorithmRivalsController.js";
+import { testSQLRival } from "./sqlRivalsController.js";
 
 export const getRivals = async (req, res, next) => {
   try {
@@ -390,3 +391,5 @@ export const getLastSubmission = async (req, res, next) => {
   if (submissions.length === 0) return res.sendStatus(404);
   res.json(submissions[0]);
 };
+
+
